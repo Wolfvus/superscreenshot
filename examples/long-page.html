@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SuperScreenshot test page</title>
+    <style>
+      :root { font-family: "SF Pro Text", "Segoe UI", system-ui, sans-serif; }
+      body { margin: 0; background: #f6f3ee; color: #1b1c1e; }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 14px 24px;
+        background: #6d5cff;
+        color: white;
+        font-weight: 650;
+      }
+      main { max-width: 720px; margin: 0 auto; padding: 28px 20px 80px; }
+      section {
+        margin: 20px 0;
+        padding: 24px;
+        min-height: 280px;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      }
+      h1 { font-size: 2rem; }
+      .band { height: 160px; border-radius: 12px; }
+    </style>
+  </head>
+  <body>
+    <header>Sticky header — should appear only once in a full-page capture</header>
+    <main>
+      <h1>Long page for SuperScreenshot</h1>
+      <p>Open this file in Chrome, then capture the full page. You should get one tall PNG with this header only at the top.</p>
+      <script>
+        const colors = ["#fde68a", "#bbf7d0", "#bfdbfe", "#fecaca", "#ddd6fe", "#fed7aa"];
+        for (let i = 1; i <= 16; i++) {
+          const section = document.createElement("section");
+          section.innerHTML = `<h2>Block ${i}</h2><p>Scroll past this block. The capture should include it without repeating the purple bar.</p><div class="band" style="background:${colors[(i - 1) % colors.length]}"></div>`;
+          document.querySelector("main").append(section);
+        }
+      </script>
+    </main>
+  </body>
+</html>

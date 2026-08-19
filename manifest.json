@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "SuperScreenshot",
+  "short_name": "SuperShot",
+  "version": "1.0.0",
+  "description": "Capture full-page screenshots of any tab. Scrolls, stitches, and saves locally — nothing is uploaded.",
+  "minimum_chrome_version": "114",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "SuperScreenshot",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["activeTab", "scripting", "contextMenus", "unlimitedStorage"],
+  "host_permissions": ["<all_urls>"],
+  "commands": {
+    "capture-full": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Capture a full-page screenshot"
+    },
+    "capture-visible": {
+      "suggested_key": {
+        "default": "Alt+Shift+V",
+        "mac": "Alt+Shift+V"
+      },
+      "description": "Capture the visible area"
+    }
+  }
+}

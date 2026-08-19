@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SuperScreenshot</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <img class="logo" src="icons/icon48.png" alt="" width="28" height="28" />
+      <div>
+        <h1>SuperScreenshot</h1>
+        <p class="tag">Full-page captures, saved only on this computer.</p>
+      </div>
+    </header>
+
+    <div id="warning" class="warning" hidden></div>
+
+    <div class="actions">
+      <button id="full" class="btn primary" type="button">
+        <span class="btn-title">Capture full page</span>
+        <span class="btn-sub">Scroll and stitch everything below the fold</span>
+      </button>
+      <button id="visible" class="btn" type="button">
+        <span class="btn-title">Visible area</span>
+        <span class="btn-sub">Just what’s on screen right now</span>
+      </button>
+    </div>
+
+    <div id="progress" class="progress" hidden>
+      <div class="progress-top">
+        <span id="progress-label">Capturing…</span>
+        <span id="progress-count"></span>
+      </div>
+      <div class="bar"><div id="bar-fill"></div></div>
+      <button id="cancel" class="link" type="button">Cancel</button>
+    </div>
+
+    <footer>
+      <p id="shortcuts" class="muted"></p>
+    </footer>
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

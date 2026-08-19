@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Screenshot preview</title>
+    <link rel="stylesheet" href="preview.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <div class="brand">
+        <img src="icons/icon32.png" alt="" width="22" height="22" />
+        <div>
+          <div id="title" class="title">Screenshot</div>
+          <div id="meta" class="meta"></div>
+        </div>
+      </div>
+      <div class="tools">
+        <button id="copy" class="btn" type="button" disabled>Copy</button>
+        <button id="download" class="btn primary" type="button" disabled>Download PNG</button>
+      </div>
+    </header>
+    <main>
+      <div id="status" class="status">Stitching screenshot…</div>
+      <div id="stage" class="stage" hidden>
+        <img id="image" alt="Captured page" />
+      </div>
+    </main>
+    <script src="preview.js" type="module"></script>
+  </body>
+</html>
