@@ -20,7 +20,9 @@ No screenshot is uploaded to a server. Captures exist temporarily in the extensi
 
 - Full-page scrolling capture with automatic image stitching
 - Visible-area capture
-- Fixed responsive viewport presets for iPad and iPhone 15 Pro
+- Streamlined popup with clear capture progress and cancellation
+- Fixed responsive viewport presets for iPad (768 × 1024) and iPhone 15 Pro (393 × 852)
+- Responsive preview workspace with fit and 25–200% zoom controls
 - Local preview with **Copy**, **Download PNG**, and **Trash** actions
 - Immediate automatic cleanup when the preview tab closes
 - Toolbar, keyboard shortcut, and context-menu capture options
@@ -43,6 +45,7 @@ Pin SuperScreenshot from Chrome's extensions menu for quick access. To capture `
 - Select iPad or iPhone 15 Pro to capture that responsive/mobile layout.
 - Use **Alt+Shift+S** for full-page capture or **Alt+Shift+V** for visible-area capture. On macOS, the shortcuts are **⌥⇧S** and **⌥⇧V**.
 - Use the page context menu for a full-page capture.
+- In the preview, use **−**, **Fit**, and **+** to inspect the result, then copy, download, or delete it.
 
 Mobile emulation is temporary. The extension restores the page's normal viewport immediately after capture completes or is cancelled.
 
@@ -102,7 +105,9 @@ Ninguna captura se envía a un servidor. Las imágenes existen temporalmente en 
 
 - Captura de página completa con desplazamiento y unión automática
 - Captura del área visible
-- Tamaños adaptables fijos para iPad y iPhone 15 Pro
+- Ventana emergente simplificada con progreso de captura y cancelación
+- Tamaños adaptables fijos para iPad (768 × 1024) y iPhone 15 Pro (393 × 852)
+- Vista previa adaptable con ajuste a la ventana y zoom de 25–200 %
 - Vista previa local con **Copy**, **Download PNG** y **Trash**
 - Eliminación automática inmediata al cerrar la vista previa
 - Captura desde la barra, atajos de teclado y menú contextual
@@ -125,6 +130,7 @@ Fija SuperScreenshot desde el menú de extensiones de Chrome para tener acceso r
 - Selecciona iPad o iPhone 15 Pro para capturar ese diseño adaptable/móvil.
 - Usa **Alt+Shift+S** para una página completa o **Alt+Shift+V** para el área visible. En macOS, usa **⌥⇧S** y **⌥⇧V**.
 - También puedes iniciar una captura completa desde el menú contextual de la página.
+- En la vista previa, usa **−**, **Fit** y **+** para revisar el resultado y después copiarlo, descargarlo o eliminarlo.
 
 La emulación móvil es temporal. La extensión restaura el tamaño normal de la página al terminar o cancelar la captura.
 
