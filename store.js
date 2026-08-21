@@ -44,3 +44,7 @@ export function getCapture(id) {
 export function deleteCapture(id) {
   return run("readwrite", (store) => store.delete(id));
 }
+
+export function listCaptureIds() {
+  return run("readonly", (store) => store.getAllKeys());
+}

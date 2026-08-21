@@ -60,7 +60,12 @@
     if (state.root && !state.root.isWindow && state.root.el) {
       return { x: state.root.el.scrollLeft, y: state.root.el.scrollTop };
     }
-    return { x: window.scrollX, y: window.scrollY };
+    const html = document.documentElement;
+    const body = document.body;
+    return {
+      x: Math.max(window.scrollX || 0, html.scrollLeft || 0, body ? body.scrollLeft : 0),
+      y: Math.max(window.scrollY || 0, html.scrollTop || 0, body ? body.scrollTop : 0),
+    };
   }
 
   function metrics() {
@@ -144,12 +149,19 @@
       if (Math.abs(root.el.scrollTop - y) > 1) root.el.scrollTop = y;
       if (Math.abs(root.el.scrollLeft - x) > 1) root.el.scrollLeft = x;
     } else {
+      const html = document.documentElement;
+      const body = document.body;
+      html.scrollTop = y;
+      html.scrollLeft = x;
+      if (body) {
+        body.scrollTop = y;
+        body.scrollLeft = x;
+      }
       try {
         window.scrollTo({ left: x, top: y, behavior: "instant" });
       } catch {
         window.scrollTo(x, y);
       }
-      if (Math.abs(window.scrollY - y) > 1) window.scrollTo(x, y);
     }
     return currentScroll();
   }

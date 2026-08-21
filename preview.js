@@ -92,11 +92,13 @@ async function stitch(capture) {
   let destY = 0;
   for (let i = 0; i < bitmaps.length; i++) {
     const bitmap = bitmaps[i];
+    const tileCssH = bitmap.height / scale;
     const scrollY = tiles[i].scrollY || 0;
     const remaining = documentHeight - destY;
     if (remaining <= 0.5) break;
-    const sourceCssY = Math.max(0, destY - scrollY);
-    const sliceCssH = Math.min(windowHeight - sourceCssY, remaining);
+    let sourceCssY = Math.max(0, destY - scrollY);
+    if (sourceCssY >= tileCssH - 0.5) sourceCssY = 0;
+    const sliceCssH = Math.min(tileCssH - sourceCssY, remaining);
     if (sliceCssH <= 0.5) continue;
     const sy = sourceCssY * scale;
     const sh = Math.min(bitmap.height - sy, sliceCssH * scale);
