@@ -16,15 +16,21 @@
         </div>
       </div>
       <div class="tools">
-        <button id="copy" class="btn" type="button" disabled>Copy</button>
-        <button id="download" class="btn primary" type="button" disabled>Download PNG</button>
-        <button id="discard" class="btn danger" type="button">Trash</button>
+        <div class="zoom-tools" aria-label="Preview zoom">
+          <button id="zoom-out" class="icon-btn" type="button" title="Zoom out" disabled aria-label="Zoom out">−</button>
+          <button id="zoom-fit" class="zoom-label" type="button" title="Fit screenshot to window" disabled>Fit</button>
+          <button id="zoom-in" class="icon-btn" type="button" title="Zoom in" disabled aria-label="Zoom in">+</button>
+        </div>
+        <span class="tool-divider" aria-hidden="true"></span>
+        <button id="copy" class="btn" type="button" disabled><span aria-hidden="true">▣</span> Copy</button>
+        <button id="download" class="btn primary" type="button" disabled><span aria-hidden="true">↓</span> Download PNG</button>
+        <button id="discard" class="btn danger icon-only" type="button" title="Delete screenshot" aria-label="Delete screenshot">×</button>
       </div>
     </header>
     <main>
-      <div id="status" class="status">Stitching screenshot…</div>
+      <div id="status" class="status" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><span id="status-text">Stitching screenshot…</span></div>
       <div id="stage" class="stage" hidden>
-        <img id="image" alt="Captured page" />
+        <div class="image-shell"><img id="image" alt="Captured page" /></div>
       </div>
     </main>
     <script src="preview.js" type="module"></script>

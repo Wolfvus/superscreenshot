@@ -20,8 +20,7 @@ No screenshot is uploaded to a server. Captures exist temporarily in the extensi
 
 - Full-page scrolling capture with automatic image stitching
 - Visible-area capture
-- Responsive viewport presets for iPhone, Pixel, and iPad
-- Custom mobile viewport dimensions
+- Fixed responsive viewport presets for iPad and iPhone 15 Pro
 - Local preview with **Copy**, **Download PNG**, and **Trash** actions
 - Immediate automatic cleanup when the preview tab closes
 - Toolbar, keyboard shortcut, and context-menu capture options
@@ -40,8 +39,8 @@ Pin SuperScreenshot from Chrome's extensions menu for quick access. To capture `
 ### Usage
 
 - Open the toolbar popup and choose **Capture full page** or **Visible area**.
-- Select **Desktop** to use the current browser viewport.
-- Select an iPhone, Pixel, iPad, or custom viewport to capture a responsive/mobile layout.
+- Select **As is** to use the current browser viewport.
+- Select iPad or iPhone 15 Pro to capture that responsive/mobile layout.
 - Use **Alt+Shift+S** for full-page capture or **Alt+Shift+V** for visible-area capture. On macOS, the shortcuts are **⌥⇧S** and **⌥⇧V**.
 - Use the page context menu for a full-page capture.
 
@@ -103,8 +102,7 @@ Ninguna captura se envía a un servidor. Las imágenes existen temporalmente en 
 
 - Captura de página completa con desplazamiento y unión automática
 - Captura del área visible
-- Tamaños adaptables para iPhone, Pixel y iPad
-- Dimensiones móviles personalizadas
+- Tamaños adaptables fijos para iPad y iPhone 15 Pro
 - Vista previa local con **Copy**, **Download PNG** y **Trash**
 - Eliminación automática inmediata al cerrar la vista previa
 - Captura desde la barra, atajos de teclado y menú contextual
@@ -123,8 +121,8 @@ Fija SuperScreenshot desde el menú de extensiones de Chrome para tener acceso r
 ### Uso
 
 - Abre la extensión y selecciona **Capture full page** o **Visible area**.
-- Selecciona **Desktop** para usar el tamaño actual de la ventana.
-- Selecciona iPhone, Pixel, iPad o un tamaño personalizado para capturar el diseño adaptable/móvil.
+- Selecciona **As is** para usar el tamaño actual de la ventana.
+- Selecciona iPad o iPhone 15 Pro para capturar ese diseño adaptable/móvil.
 - Usa **Alt+Shift+S** para una página completa o **Alt+Shift+V** para el área visible. En macOS, usa **⌥⇧S** y **⌥⇧V**.
 - También puedes iniciar una captura completa desde el menú contextual de la página.
 

@@ -6,16 +6,22 @@ const MAX_SIDE = 32767;
 const titleEl = document.getElementById("title");
 const metaEl = document.getElementById("meta");
 const statusEl = document.getElementById("status");
+const statusTextEl = document.getElementById("status-text");
 const stageEl = document.getElementById("stage");
 const imageEl = document.getElementById("image");
 const copyBtn = document.getElementById("copy");
 const downloadBtn = document.getElementById("download");
 const discardBtn = document.getElementById("discard");
+const zoomOutBtn = document.getElementById("zoom-out");
+const zoomFitBtn = document.getElementById("zoom-fit");
+const zoomInBtn = document.getElementById("zoom-in");
+const imageShell = document.querySelector(".image-shell");
 
 const id = new URLSearchParams(location.search).get("id");
 let objectUrl = "";
 let pngBlob = null;
 let filename = "screenshot.png";
+let zoom = 0;
 
 function fail(message) {
   statusEl.hidden = false;
@@ -23,6 +29,22 @@ function fail(message) {
   statusEl.textContent = message;
   stageEl.hidden = true;
 }
+
+function setZoom(next) {
+  zoom = Math.max(25, Math.min(200, next));
+  imageShell.style.width = `${zoom}%`;
+  imageShell.style.maxWidth = "none";
+  zoomFitBtn.textContent = `${zoom}%`;
+}
+
+zoomOutBtn.addEventListener("click", () => setZoom((zoom || 100) - 25));
+zoomInBtn.addEventListener("click", () => setZoom((zoom || 100) + 25));
+zoomFitBtn.addEventListener("click", () => {
+  zoom = 0;
+  imageShell.style.width = "min(1100px, 100%)";
+  imageShell.style.maxWidth = "1100px";
+  zoomFitBtn.textContent = "Fit";
+});
 
 function formatBytes(n) {
   if (n < 1024) return `${n} B`;
@@ -97,6 +119,9 @@ async function stitch(capture) {
 function enableActions() {
   copyBtn.disabled = false;
   downloadBtn.disabled = false;
+  zoomOutBtn.disabled = false;
+  zoomFitBtn.disabled = false;
+  zoomInBtn.disabled = false;
 }
 
 copyBtn.addEventListener("click", async () => {
@@ -150,7 +175,7 @@ async function main() {
   document.title = capture.title ? `${capture.title} · screenshot` : "Screenshot preview";
   titleEl.textContent = capture.title || "Screenshot";
   filename = capture.filename || filename;
-  statusEl.textContent = capture.mode === "visible" ? "Loading screenshot…" : "Stitching full-page screenshot…";
+  statusTextEl.textContent = capture.mode === "visible" ? "Loading screenshot…" : "Stitching full-page screenshot…";
 
   pngBlob = capture.image || (await stitch(capture));
   if (!capture.image) {

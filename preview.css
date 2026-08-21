@@ -1,11 +1,13 @@
 :root {
   color-scheme: dark;
-  --bg: #0c0e13;
-  --bar: rgba(16, 18, 24, 0.92);
-  --line: #262c3a;
-  --text: #f4f6fa;
-  --muted: #8d95a8;
-  --accent: #0577b9;
+  --bg: #090e17;
+  --bar: rgba(11, 17, 28, 0.88);
+  --surface: #121c2b;
+  --line: #26364c;
+  --text: #f5f9ff;
+  --muted: #91a0b7;
+  --accent: #0782c5;
+  --accent-bright: #20c9e8;
 }
 
 * {
@@ -35,10 +37,12 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 10px 16px;
+  min-height: 64px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--line);
   background: var(--bar);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
 }
 
 .brand {
@@ -49,12 +53,17 @@ body {
 }
 
 .brand img {
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 3px;
+  border: 1px solid rgba(71, 187, 228, 0.26);
+  border-radius: 9px;
+  background: rgba(23, 128, 178, 0.12);
 }
 
 .title {
   font-weight: 650;
-  font-size: 13.5px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -72,10 +81,59 @@ body {
   flex: none;
 }
 
+.zoom-tools {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(7, 12, 21, 0.55);
+}
+
+.icon-btn,
+.zoom-label {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.icon-btn {
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  font-size: 17px;
+}
+
+.zoom-label {
+  min-width: 44px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.icon-btn:hover:not(:disabled),
+.zoom-label:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); }
+
+.icon-btn:focus-visible,
+.zoom-label:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 1px;
+}
+
+.icon-btn:disabled,
+.zoom-label:disabled { opacity: 0.4; cursor: default; }
+
+.tool-divider { width: 1px; height: 24px; background: var(--line); }
+
 .btn {
   appearance: none;
   border: 1px solid var(--line);
-  background: #171b24;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
   color: var(--text);
   border-radius: 10px;
   padding: 8px 12px;
@@ -84,17 +142,26 @@ body {
 }
 
 .btn:hover:not(:disabled) {
-  border-color: #3b4458;
+  border-color: #3e5777;
+  background: #18263a;
 }
 
 .btn.primary {
-  background: #0577b9;
-  border-color: transparent;
+  background: linear-gradient(135deg, #0b9ed1, #096ab1);
+  border-color: rgba(66, 205, 234, 0.3);
   color: white;
+  box-shadow: 0 8px 24px rgba(4, 101, 169, 0.25);
 }
 
 .btn.danger {
   color: #ffb4be;
+}
+
+.btn.icon-only {
+  width: 34px;
+  justify-content: center;
+  padding-inline: 0;
+  font-size: 18px;
 }
 
 .btn.danger:hover:not(:disabled) {
@@ -114,7 +181,9 @@ body {
 
 main {
   flex: 1;
-  padding: 24px 16px 48px;
+  padding: 32px 24px 64px;
+  background-image: radial-gradient(rgba(92, 124, 160, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
 .status {
@@ -124,20 +193,59 @@ main {
   color: var(--muted);
 }
 
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent-bright);
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: spin 800ms linear infinite;
+}
+
+.status.error .spinner { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
 .status.error {
   color: #ffb4be;
 }
 
 .stage {
-  width: min(1100px, 100%);
+  width: 100%;
   margin: 0 auto;
+  text-align: center;
+  overflow: auto;
+}
+
+.image-shell {
+  display: inline-block;
+  width: min(1100px, 100%);
+  max-width: 1100px;
+  min-width: min(100%, 480px);
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #151f2d;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  transition: width 180ms ease;
 }
 
 #image {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 10px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
   background: #fff;
+}
+
+@media (max-width: 760px) {
+  .bar { align-items: flex-start; padding: 10px 12px; }
+  .brand { padding-top: 2px; }
+  .meta { max-width: 42vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tool-divider, .zoom-tools, #copy { display: none; }
+  .btn { padding: 8px 10px; }
+  main { padding: 20px 10px 40px; }
 }

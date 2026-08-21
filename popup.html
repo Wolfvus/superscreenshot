@@ -8,44 +8,55 @@
   </head>
   <body>
     <header class="head">
-      <img class="logo" src="icons/icon48.png" alt="" width="28" height="28" />
-      <div>
-        <h1>SuperScreenshot</h1>
-        <p class="tag">Full-page captures, kept only while you need them.</p>
+      <div class="logo-wrap">
+        <img class="logo" src="icons/icon48.png" alt="" width="32" height="32" />
       </div>
+      <div class="head-copy">
+        <h1>SuperScreenshot</h1>
+        <p id="site-label" class="tag">Ready to capture</p>
+      </div>
+      <span class="local-badge" title="Screenshots never leave this browser">
+        <span class="status-dot" aria-hidden="true"></span>Local
+      </span>
     </header>
 
     <div id="warning" class="warning" hidden></div>
 
     <section class="viewport" aria-labelledby="viewport-label">
       <div class="viewport-top">
-        <label id="viewport-label" for="device">Viewport</label>
+        <div>
+          <label id="viewport-label" for="device">Capture viewport</label>
+          <p>Preview the page at another screen size</p>
+        </div>
         <select id="device">
-          <option value="desktop">Desktop (current window)</option>
-          <option value="iphone">iPhone · 390 × 844</option>
-          <option value="pixel">Pixel · 412 × 915</option>
+          <option value="desktop">As is</option>
           <option value="ipad">iPad · 768 × 1024</option>
-          <option value="custom">Custom</option>
+          <option value="iphone15pro">iPhone 15 Pro · 393 × 852</option>
         </select>
-      </div>
-      <div id="dimensions" class="dimensions" hidden>
-        <label>Width <input id="viewport-width" type="number" min="200" max="2000" value="390" inputmode="numeric" /> px</label>
-        <label>Height <input id="viewport-height" type="number" min="200" max="3000" value="844" inputmode="numeric" /> px</label>
       </div>
     </section>
 
+    <div class="section-label">Choose a capture</div>
     <div class="actions">
       <button id="full" class="btn primary" type="button">
-        <span class="btn-title">Capture full page</span>
-        <span class="btn-sub">Scroll and stitch everything below the fold</span>
+        <span class="action-icon" aria-hidden="true">↕</span>
+        <span class="btn-copy">
+          <span class="btn-title">Capture full page</span>
+          <span class="btn-sub">Scroll and stitch the entire page</span>
+        </span>
+        <span class="arrow" aria-hidden="true">→</span>
       </button>
       <button id="visible" class="btn" type="button">
-        <span class="btn-title">Visible area</span>
-        <span class="btn-sub">Just what’s on screen right now</span>
+        <span class="action-icon" aria-hidden="true">▣</span>
+        <span class="btn-copy">
+          <span class="btn-title">Visible area</span>
+          <span class="btn-sub">Capture only what you can see</span>
+        </span>
+        <span class="arrow" aria-hidden="true">→</span>
       </button>
     </div>
 
-    <div id="progress" class="progress" hidden>
+    <div id="progress" class="progress" role="status" aria-live="polite" hidden>
       <div class="progress-top">
         <span id="progress-label">Capturing…</span>
         <span id="progress-count"></span>
@@ -55,6 +66,8 @@
     </div>
 
     <footer>
+      <span class="shield" aria-hidden="true">✓</span>
+      <span>Your captures stay on this device</span>
       <p id="shortcuts" class="muted"></p>
     </footer>
     <script src="popup.js" type="module"></script>

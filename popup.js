@@ -11,14 +11,11 @@ const barFill = document.getElementById("bar-fill");
 const cancelBtn = document.getElementById("cancel");
 const shortcuts = document.getElementById("shortcuts");
 const device = document.getElementById("device");
-const dimensions = document.getElementById("dimensions");
-const viewportWidth = document.getElementById("viewport-width");
-const viewportHeight = document.getElementById("viewport-height");
+const siteLabel = document.getElementById("site-label");
 
 const DEVICE_VIEWPORTS = {
-  iphone: { width: 390, height: 844, dpr: 3 },
-  pixel: { width: 412, height: 915, dpr: 2.625 },
   ipad: { width: 768, height: 1024, dpr: 2 },
+  iphone15pro: { width: 393, height: 852, dpr: 3 },
 };
 
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
@@ -91,14 +88,7 @@ function onMessage(msg) {
 
 function selectedViewport() {
   if (device.value === "desktop") return null;
-  if (DEVICE_VIEWPORTS[device.value]) return DEVICE_VIEWPORTS[device.value];
-  const width = Number(viewportWidth.value);
-  const height = Number(viewportHeight.value);
-  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 200 || width > 2000 || height < 200 || height > 3000) {
-    setWarning("Custom viewport must be 200–2000 px wide and 200–3000 px tall.");
-    return undefined;
-  }
-  return { width, height, dpr: 2 };
+  return DEVICE_VIEWPORTS[device.value] || null;
 }
 
 function capture(mode) {
@@ -115,14 +105,6 @@ function capture(mode) {
 
 fullBtn.addEventListener("click", () => capture("full"));
 visibleBtn.addEventListener("click", () => capture("visible"));
-device.addEventListener("change", () => {
-  const preset = DEVICE_VIEWPORTS[device.value];
-  dimensions.hidden = device.value !== "custom";
-  if (preset) {
-    viewportWidth.value = preset.width;
-    viewportHeight.value = preset.height;
-  }
-});
 cancelBtn.addEventListener("click", () => {
   connect().postMessage({ type: "CANCEL" });
   chrome.runtime.sendMessage({ type: "CANCEL" });
@@ -131,6 +113,14 @@ cancelBtn.addEventListener("click", () => {
 const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 tabId = tab?.id ?? null;
 const url = tab?.url || "";
+if (url) {
+  try {
+    siteLabel.textContent = new URL(url).hostname || "Ready to capture";
+    siteLabel.title = url;
+  } catch {
+    siteLabel.textContent = "Ready to capture";
+  }
+}
 if (tabId == null || RESTRICTED.test(url) || STORE_HOSTS.test(url)) {
   fullBtn.dataset.blocked = "1";
   fullBtn.disabled = true;
