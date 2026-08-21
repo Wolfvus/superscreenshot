@@ -199,7 +199,9 @@ async function main() {
     }
     imageEl.onload = () => resolve({ w: imageEl.naturalWidth, h: imageEl.naturalHeight });
   });
-  metaEl.textContent = `${dims.w} × ${dims.h} · ${formatBytes(pngBlob.size)} · ${capture.mode === "visible" ? "visible area" : "full page"}`;
+  const kind = capture.mode === "visible" ? "visible area" : "full page";
+  const device = capture.deviceLabel ? ` · ${capture.deviceLabel}` : "";
+  metaEl.textContent = `${dims.w} × ${dims.h} · ${formatBytes(pngBlob.size)} · ${kind}${device}`;
 }
 
 main().catch((err) => fail(err?.message || "Could not open this screenshot."));

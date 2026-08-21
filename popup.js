@@ -12,11 +12,6 @@ const cancelBtn = document.getElementById("cancel");
 const shortcuts = document.getElementById("shortcuts");
 const device = document.getElementById("device");
 
-const DEVICE_VIEWPORTS = {
-  ipad: { width: 768, height: 1024, dpr: 2 },
-  iphone15pro: { width: 393, height: 852, dpr: 3 },
-};
-
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 shortcuts.textContent = isMac
   ? "Shortcuts: ⌥⇧S full page · ⌥⇧V visible area"
@@ -85,21 +80,19 @@ function onMessage(msg) {
   }
 }
 
-function selectedViewport() {
-  if (device.value === "desktop") return null;
-  return DEVICE_VIEWPORTS[device.value] || null;
-}
-
 function capture(mode) {
   if (busy || tabId == null) return;
-  const viewport = selectedViewport();
-  if (viewport === undefined) return;
   setWarning("");
   setBusy(true);
   progressLabel.textContent = "Starting…";
   progressCount.textContent = "";
   barFill.style.width = "8%";
-  connect().postMessage({ type: "CAPTURE", mode, tabId, viewport });
+  connect().postMessage({
+    type: "CAPTURE",
+    mode,
+    tabId,
+    device: device.value === "desktop" ? null : device.value,
+  });
 }
 
 fullBtn.addEventListener("click", () => capture("full"));

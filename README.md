@@ -12,7 +12,7 @@ This repository is a fork of [soymangomez/superscreenshot](https://github.com/so
 
 ### Overview
 
-SuperScreenshot captures an entire web page or only the visible viewport and produces a local PNG preview. Full-page captures are assembled from overlapping viewport images while the extension scrolls the page and suppresses repeating fixed elements.
+SuperScreenshot captures an entire web page or only the visible viewport and produces a local PNG preview. Full-page captures are assembled from viewport images while the extension scrolls the page and suppresses repeating fixed elements. Device captures emulate screen metrics, pixel ratio, touch input, and a mobile user agent, then verify the PNG dimensions before saving.
 
 No screenshot is uploaded to a server. Captures exist temporarily in the extension's IndexedDB storage and are deleted as soon as their preview tab is closed or when **Trash** is selected.
 
@@ -44,7 +44,7 @@ Pin SuperScreenshot from Chrome's extensions menu for quick access. To capture `
 - Use **Alt+Shift+S** for full-page capture or **Alt+Shift+V** for visible-area capture. On macOS, the shortcuts are **⌥⇧S** and **⌥⇧V**.
 - Use the page context menu for a full-page capture.
 
-Mobile emulation is temporary. The extension restores the page's normal viewport immediately after capture completes or is cancelled.
+Mobile emulation is temporary. Chrome may show a debugging banner while it is active. The extension restores the page's normal viewport and detaches the debugger immediately after capture completes or is cancelled.
 
 ### Permissions
 
@@ -64,6 +64,7 @@ superscreenshot/
 ├── manifest.json          Chrome Manifest V3 configuration and permissions
 ├── background.js          Capture orchestration, viewport emulation, and cleanup
 ├── content.js             Page metrics, scrolling, and fixed-element handling
+├── devices.js             Verified iPad and iPhone 15 Pro emulation profiles
 ├── popup.html             Toolbar popup markup
 ├── popup.css              Toolbar popup styling and ocean-blue theme
 ├── popup.js               Popup state, viewport selection, and capture controls
@@ -94,7 +95,7 @@ The extension uses plain HTML, CSS, and JavaScript with no build step. After cha
 
 ### Descripción
 
-SuperScreenshot captura una página web completa o solamente el área visible y genera una vista previa PNG local. Para capturar una página completa, la extensión desplaza el contenido, toma imágenes superpuestas y evita que los elementos fijos se repitan en el resultado final.
+SuperScreenshot captura una página web completa o solamente el área visible y genera una vista previa PNG local. Para capturar una página completa, la extensión desplaza el contenido, toma imágenes del viewport y evita que los elementos fijos se repitan en el resultado final. Las capturas de dispositivos emulan las métricas de pantalla, la densidad de píxeles, la entrada táctil y un agente de usuario móvil, y verifican las dimensiones del PNG antes de guardarlo.
 
 Ninguna captura se envía a un servidor. Las imágenes existen temporalmente en el almacenamiento IndexedDB de la extensión y se eliminan en cuanto se cierra la pestaña de vista previa o al seleccionar **Trash**.
 
@@ -126,7 +127,7 @@ Fija SuperScreenshot desde el menú de extensiones de Chrome para tener acceso r
 - Usa **Alt+Shift+S** para una página completa o **Alt+Shift+V** para el área visible. En macOS, usa **⌥⇧S** y **⌥⇧V**.
 - También puedes iniciar una captura completa desde el menú contextual de la página.
 
-La emulación móvil es temporal. La extensión restaura el tamaño normal de la página al terminar o cancelar la captura.
+La emulación móvil es temporal. Chrome puede mostrar una barra de depuración mientras está activa. La extensión restaura el tamaño normal de la página y desconecta el depurador inmediatamente después de terminar o cancelar la captura.
 
 ### Permisos
 
@@ -146,6 +147,7 @@ superscreenshot/
 ├── manifest.json          Configuración y permisos de Chrome Manifest V3
 ├── background.js          Captura, emulación de viewport y eliminación
 ├── content.js             Medición, desplazamiento y elementos fijos
+├── devices.js             Perfiles verificados de emulación para iPad y iPhone 15 Pro
 ├── popup.html             Estructura de la ventana de la extensión
 ├── popup.css              Estilos y tema azul océano
 ├── popup.js               Estado, selección del viewport y controles

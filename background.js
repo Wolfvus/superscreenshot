@@ -1,3 +1,4 @@
+import { DEVICES } from "./devices.js";
 import { deleteCapture, saveCapture } from "./store.js";
 
 const MAX_CAPTURES = 80;
@@ -42,7 +43,7 @@ chrome.runtime.onConnect.addListener((port) => {
         mode: msg.mode === "visible" ? "visible" : "full",
         tabId: msg.tabId,
         port,
-        viewport: msg.viewport || null,
+        deviceId: msg.device || null,
       });
     } else if (msg?.type === "CANCEL") {
       if (session) session.aborted = true;
@@ -202,51 +203,74 @@ async function inject(tabId) {
   });
 }
 
-async function captureWindow(windowId, lastAt, debuggee = null) {
-  const wait = CAPTURE_GAP_MS - (Date.now() - lastAt);
-  if (wait > 0) await delay(wait);
-  try {
-    if (debuggee) {
-      return { dataUrl: await captureViewport(debuggee), at: Date.now() };
-    }
-    const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "png" });
-    return { dataUrl, at: Date.now() };
-  } catch (err) {
-    const message = String(err?.message || err);
-    if (/file/i.test(message)) throw new Error(restrictedMessage("file://"));
-    throw new Error("Couldn't photograph the tab. Keep this window in front until capture finishes.");
-  }
+function pngSize(dataUrl) {
+  const match = /^data:image\/png;base64,(.+)$/.exec(dataUrl);
+  if (!match) return { width: 0, height: 0 };
+  const binary = atob(match[1].slice(0, 64));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return {
+    width: ((bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19]) >>> 0,
+    height: ((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23]) >>> 0,
+  };
 }
 
-async function applyViewport(tabId, viewport) {
-  if (!viewport) return null;
+function resolveDevice(deviceId) {
+  return (deviceId && DEVICES[deviceId]) || null;
+}
+
+function sendDebugger(debuggee, method, params) {
+  return chrome.debugger.sendCommand(debuggee, method, params);
+}
+
+async function attachDevice(tabId, device) {
   const debuggee = { tabId };
   try {
     await chrome.debugger.attach(debuggee, "1.3");
-    await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride", {
-      width: viewport.width,
-      height: viewport.height,
-      deviceScaleFactor: viewport.dpr,
-      mobile: true,
-      screenWidth: viewport.width,
-      screenHeight: viewport.height,
+  } catch (err) {
+    const message = String(err?.message || err);
+    if (/Another debugger|already attached|DevTools/i.test(message)) {
+      throw new Error("Close Chrome DevTools on this tab and try again.");
+    }
+    throw new Error("Couldn't emulate this device. Reload the page and try again.");
+  }
+
+  try {
+    await sendDebugger(debuggee, "Page.enable");
+    await sendDebugger(debuggee, "Emulation.setUserAgentOverride", {
+      userAgent: device.userAgent,
+      acceptLanguage: "en-US,en",
+      platform: device.platform,
+      userAgentMetadata: device.userAgentMetadata,
     });
-    await delay(250);
+    await sendDebugger(debuggee, "Emulation.setTouchEmulationEnabled", {
+      enabled: true,
+      maxTouchPoints: 5,
+    });
+    await sendDebugger(debuggee, "Emulation.setDeviceMetricsOverride", {
+      width: device.width,
+      height: device.height,
+      deviceScaleFactor: device.dpr,
+      mobile: true,
+      screenWidth: device.width,
+      screenHeight: device.height,
+    });
     return debuggee;
   } catch (err) {
-    try {
-      await chrome.debugger.detach(debuggee);
-    } catch {
-      /* debugger was not attached */
-    }
-    throw new Error(`Couldn't set the mobile viewport. ${err?.message || "Close DevTools and try again."}`);
+    await detachDevice(debuggee);
+    throw new Error(`Couldn't set the ${device.label} viewport. ${err?.message || "Try again."}`);
   }
 }
 
-async function clearViewport(debuggee) {
+async function detachDevice(debuggee) {
   if (!debuggee) return;
   try {
-    await chrome.debugger.sendCommand(debuggee, "Emulation.clearDeviceMetricsOverride");
+    await sendDebugger(debuggee, "Emulation.setTouchEmulationEnabled", { enabled: false });
+  } catch {
+    /* tab may have closed */
+  }
+  try {
+    await sendDebugger(debuggee, "Emulation.clearDeviceMetricsOverride");
   } catch {
     /* tab may have closed */
   }
@@ -257,11 +281,92 @@ async function clearViewport(debuggee) {
   }
 }
 
-async function captureViewport(debuggee) {
-  if (!debuggee) return null;
-  const result = await chrome.debugger.sendCommand(debuggee, "Page.captureScreenshot", { format: "png" });
+async function captureEmulated(debuggee, { beyond = false, clip = null, fromSurface = false } = {}) {
+  const params = {
+    format: "png",
+    fromSurface,
+    captureBeyondViewport: Boolean(beyond),
+  };
+  if (clip) params.clip = clip;
+  const result = await sendDebugger(debuggee, "Page.captureScreenshot", params);
   if (!result?.data) throw new Error("Couldn't photograph the emulated viewport.");
   return `data:image/png;base64,${result.data}`;
+}
+
+function widthMatches(dataUrl, device) {
+  const size = pngSize(dataUrl);
+  const expected = Math.round(device.width * device.dpr);
+  return Math.abs(size.width - expected) <= 2;
+}
+
+async function captureDeviceFrame(debuggee, device, { beyond = false, scrollY = 0 } = {}) {
+  const clip = {
+    x: 0,
+    y: beyond ? 0 : Math.max(0, scrollY),
+    width: device.width,
+    height: device.height,
+    scale: 1,
+  };
+  const attempts = beyond
+    ? [
+        { beyond: true, fromSurface: false },
+        { beyond: true, fromSurface: true },
+      ]
+    : [
+        { fromSurface: false },
+        { fromSurface: true, clip },
+        { fromSurface: false, clip },
+      ];
+  let lastError = null;
+  for (const attempt of attempts) {
+    try {
+      const dataUrl = await captureEmulated(debuggee, attempt);
+      if (beyond) {
+        const size = pngSize(dataUrl);
+        const viewportPx = Math.round(device.height * device.dpr);
+        if (widthMatches(dataUrl, device) && size.height > viewportPx + 8) return dataUrl;
+        lastError = new Error("Full-page device capture stayed at viewport size.");
+      } else if (widthMatches(dataUrl, device)) {
+        return dataUrl;
+      } else {
+        lastError = new Error("Emulated screenshot did not match the device width.");
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error("Couldn't photograph the emulated viewport.");
+}
+
+async function waitForDeviceWidth(tabId, width, timeout = 2500) {
+  const started = Date.now();
+  let metrics = null;
+  while (Date.now() - started < timeout) {
+    metrics = await sendToTab(tabId, { op: "metrics" });
+    if (Math.abs(Math.round(metrics.windowWidth) - width) <= 1) return metrics;
+    await delay(50);
+  }
+  if (metrics && Math.abs(Math.round(metrics.windowWidth) - width) <= 1) return metrics;
+  throw new Error(`The page did not switch to the ${width}px device viewport.`);
+}
+
+async function captureWindow(windowId, lastAt, debuggee = null, device = null, scrollY = 0) {
+  const wait = CAPTURE_GAP_MS - (Date.now() - lastAt);
+  if (wait > 0) await delay(wait);
+  try {
+    if (debuggee && device) {
+      return {
+        dataUrl: await captureDeviceFrame(debuggee, device, { scrollY }),
+        at: Date.now(),
+      };
+    }
+    const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "png" });
+    return { dataUrl, at: Date.now() };
+  } catch (err) {
+    const message = String(err?.message || err);
+    if (/file/i.test(message)) throw new Error(restrictedMessage("file://"));
+    throw new Error("Couldn't photograph the tab. Keep this window in front until capture finishes.");
+  }
 }
 
 function assertNotAborted() {
@@ -272,7 +377,7 @@ function assertNotAborted() {
   }
 }
 
-async function startCapture({ mode, tabId, port, viewport = null }) {
+async function startCapture({ mode, tabId, port, deviceId = null }) {
   if (session) {
     post(port || session.port, {
       type: "error",
@@ -290,7 +395,7 @@ async function startCapture({ mode, tabId, port, viewport = null }) {
 
   await withKeepAlive(async () => {
     try {
-      await runCapture(mode, tabId, viewport);
+      await runCapture(mode, tabId, deviceId);
     } catch (err) {
       await restoreQuiet(tabId);
       await setBadge("");
@@ -317,7 +422,7 @@ async function restoreQuiet(tabId) {
   }
 }
 
-async function runCapture(mode, tabId, viewport) {
+async function runCapture(mode, tabId, deviceId) {
   const tab = await chrome.tabs.get(tabId);
   if (isRestricted(tab.url || "")) {
     throw new Error(restrictedMessage(tab.url));
@@ -329,41 +434,55 @@ async function runCapture(mode, tabId, viewport) {
   post(session.port, { type: "progress", phase: "preparing", current: 0, total: 1 });
   await setBadge("…");
 
-  const debuggee = await applyViewport(tabId, viewport);
+  const device = resolveDevice(deviceId);
+  if (deviceId && !device) throw new Error("Unsupported device preset.");
+  const debuggee = device ? await attachDevice(tabId, device) : null;
   try {
     if (mode === "visible") {
-      await captureVisible(tab, viewport, debuggee);
+      await captureVisible(tab, debuggee, device);
       return;
     }
 
-    await captureFull(tab, debuggee);
+    await captureFull(tab, debuggee, device);
   } finally {
-    await clearViewport(debuggee);
+    await detachDevice(debuggee);
   }
 }
 
-async function captureVisible(tab, viewport, debuggee) {
+async function captureVisible(tab, debuggee, device) {
   assertNotAborted();
-  const shot = (await captureViewport(debuggee)) || (await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }));
-  const blob = dataUrlToBlob(shot);
+  if (debuggee && device) {
+    await inject(tab.id);
+    await waitForDeviceWidth(tab.id, device.width);
+    await delay(200);
+  }
+  const shot = debuggee && device
+    ? await captureWindow(tab.windowId, 0, debuggee, device)
+    : { dataUrl: await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }) };
+  const blob = dataUrlToBlob(shot.dataUrl);
   await persistAndOpen({
     mode: "visible",
     tab,
+    device,
     tiles: [{ blob, scrollY: 0 }],
     meta: {
-      windowWidth: viewport?.width || tab.width || 0,
-      windowHeight: viewport?.height || tab.height || 0,
-      documentHeight: viewport?.height || tab.height || 0,
-      dpr: viewport?.dpr || 1,
+      windowWidth: device?.width || tab.width || 0,
+      windowHeight: device?.height || tab.height || 0,
+      documentHeight: device?.height || tab.height || 0,
+      dpr: device?.dpr || 1,
     },
   });
 }
 
-async function captureFull(tab, debuggee) {
+async function captureFull(tab, debuggee, device) {
   try {
     await inject(tab.id);
   } catch {
     throw new Error("This page doesn't allow capture scripts. Try a normal webpage.");
+  }
+  if (device) {
+    await waitForDeviceWidth(tab.id, device.width);
+    await delay(200);
   }
   await sendToTab(tab.id, { op: "prepare" });
   await sendToTab(tab.id, { op: "wait" });
@@ -392,6 +511,43 @@ async function captureFull(tab, debuggee) {
       total: positions.length,
     });
 
+    if (debuggee && device) {
+      for (let i = 0; i < positions.length; i++) {
+        assertNotAborted();
+        await sendToTab(tab.id, { op: "scroll", x: 0, y: positions[i] });
+        await sendToTab(tab.id, { op: "wait" });
+        post(session.port, {
+          type: "progress",
+          phase: "capturing",
+          current: i + 1,
+          total: positions.length,
+        });
+      }
+      await sendToTab(tab.id, { op: "scroll", x: 0, y: 0 });
+      await sendToTab(tab.id, { op: "wait" });
+      try {
+        const fullShot = await captureDeviceFrame(debuggee, device, { beyond: true });
+        tiles.push({ blob: dataUrlToBlob(fullShot), scrollY: 0 });
+        await sendToTab(tab.id, { op: "restore" });
+        const size = pngSize(fullShot);
+        await persistAndOpen({
+          mode: "full",
+          tab,
+          device,
+          tiles,
+          meta: {
+            windowWidth: device.width,
+            windowHeight: device.height,
+            documentHeight: Math.round(size.height / device.dpr),
+            dpr: device.dpr,
+          },
+        });
+        return;
+      } catch {
+        /* fall back to verified scrolling tiles */
+      }
+    }
+
     for (let i = 0; i < positions.length; i++) {
       assertNotAborted();
       await sendToTab(tab.id, { op: "scroll", x: 0, y: positions[i] });
@@ -401,7 +557,13 @@ async function captureFull(tab, debuggee) {
         await sendToTab(tab.id, { op: "wait" });
       }
 
-      const shot = await captureWindow(tab.windowId, lastCaptureAt, debuggee);
+      const shot = await captureWindow(
+        tab.windowId,
+        lastCaptureAt,
+        debuggee,
+        device,
+        positions[i]
+      );
       lastCaptureAt = shot.at;
       const actual = await sendToTab(tab.id, { op: "metrics" });
       tiles.push({
@@ -433,12 +595,13 @@ async function captureFull(tab, debuggee) {
     await persistAndOpen({
       mode: "full",
       tab,
+      device,
       tiles,
       meta: {
         windowWidth: prepared.windowWidth,
         windowHeight: prepared.windowHeight,
         documentHeight,
-        dpr: prepared.dpr,
+        dpr: device?.dpr || prepared.dpr,
       },
     });
   } catch (err) {
@@ -447,7 +610,7 @@ async function captureFull(tab, debuggee) {
   }
 }
 
-async function persistAndOpen({ mode, tab, tiles, meta }) {
+async function persistAndOpen({ mode, tab, tiles, meta, device = null }) {
   assertNotAborted();
   post(session.port, { type: "progress", phase: "saving", current: tiles.length, total: tiles.length });
   const id = `ss_${Date.now()}`;
@@ -458,7 +621,8 @@ async function persistAndOpen({ mode, tab, tiles, meta }) {
       return "page";
     }
   })();
-  const filename = `screenshot-${slug(host)}-${timestamp()}.png`;
+  const devicePart = device?.filename ? `-${device.filename}` : "";
+  const filename = `screenshot-${slug(host)}${devicePart}-${timestamp()}.png`;
   await saveCapture(id, {
     id,
     createdAt: Date.now(),
@@ -466,6 +630,7 @@ async function persistAndOpen({ mode, tab, tiles, meta }) {
     url: tab.url || "",
     filename,
     mode,
+    deviceLabel: device?.label || "",
     windowWidth: meta.windowWidth,
     windowHeight: meta.windowHeight,
     documentHeight: meta.documentHeight,
