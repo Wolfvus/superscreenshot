@@ -39,7 +39,7 @@ Pin SuperScreenshot from Chrome's extensions menu for quick access. To capture `
 ### Usage
 
 - Open the toolbar popup and choose **Capture full page** or **Visible area**.
-- Select **As is** to use the current browser viewport.
+- Select **Current window** to use the current browser viewport.
 - Select iPad or iPhone 15 Pro to capture that responsive/mobile layout.
 - Use **Alt+Shift+S** for full-page capture or **Alt+Shift+V** for visible-area capture. On macOS, the shortcuts are **⌥⇧S** and **⌥⇧V**.
 - Use the page context menu for a full-page capture.
@@ -121,7 +121,7 @@ Fija SuperScreenshot desde el menú de extensiones de Chrome para tener acceso r
 ### Uso
 
 - Abre la extensión y selecciona **Capture full page** o **Visible area**.
-- Selecciona **As is** para usar el tamaño actual de la ventana.
+- Selecciona **Current window** para usar el tamaño actual de la ventana.
 - Selecciona iPad o iPhone 15 Pro para capturar ese diseño adaptable/móvil.
 - Usa **Alt+Shift+S** para una página completa o **Alt+Shift+V** para el área visible. En macOS, usa **⌥⇧S** y **⌥⇧V**.
 - También puedes iniciar una captura completa desde el menú contextual de la página.

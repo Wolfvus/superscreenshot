@@ -75,36 +75,6 @@ h1 {
   letter-spacing: -0.01em;
 }
 
-.tag {
-  margin: 1px 0 0;
-  color: var(--muted);
-  font-size: 11.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.local-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 8px;
-  border: 1px solid rgba(84, 217, 160, 0.2);
-  border-radius: 999px;
-  background: rgba(84, 217, 160, 0.08);
-  color: #a8edcd;
-  font-size: 10.5px;
-  font-weight: 650;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 3px rgba(84, 217, 160, 0.11);
-}
-
 .actions {
   display: grid;
   gap: 8px;

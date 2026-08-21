@@ -11,7 +11,6 @@ const barFill = document.getElementById("bar-fill");
 const cancelBtn = document.getElementById("cancel");
 const shortcuts = document.getElementById("shortcuts");
 const device = document.getElementById("device");
-const siteLabel = document.getElementById("site-label");
 
 const DEVICE_VIEWPORTS = {
   ipad: { width: 768, height: 1024, dpr: 2 },
@@ -113,14 +112,6 @@ cancelBtn.addEventListener("click", () => {
 const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 tabId = tab?.id ?? null;
 const url = tab?.url || "";
-if (url) {
-  try {
-    siteLabel.textContent = new URL(url).hostname || "Ready to capture";
-    siteLabel.title = url;
-  } catch {
-    siteLabel.textContent = "Ready to capture";
-  }
-}
 if (tabId == null || RESTRICTED.test(url) || STORE_HOSTS.test(url)) {
   fullBtn.dataset.blocked = "1";
   fullBtn.disabled = true;
