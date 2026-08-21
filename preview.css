@@ -5,7 +5,7 @@
   --line: #262c3a;
   --text: #f4f6fa;
   --muted: #8d95a8;
-  --accent: #6d5cff;
+  --accent: #0577b9;
 }
 
 * {
@@ -88,9 +88,18 @@ body {
 }
 
 .btn.primary {
-  background: #6d5cff;
+  background: #0577b9;
   border-color: transparent;
   color: white;
+}
+
+.btn.danger {
+  color: #ffb4be;
+}
+
+.btn.danger:hover:not(:disabled) {
+  border-color: #9a3d4c;
+  background: #321a21;
 }
 
 .btn:disabled {
@@ -99,7 +108,7 @@ body {
 }
 
 .btn:focus-visible {
-  outline: 2px solid #9b8cff;
+  outline: 2px solid #13b9df;
   outline-offset: 2px;
 }
 

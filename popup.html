@@ -11,11 +11,28 @@
       <img class="logo" src="icons/icon48.png" alt="" width="28" height="28" />
       <div>
         <h1>SuperScreenshot</h1>
-        <p class="tag">Full-page captures, saved only on this computer.</p>
+        <p class="tag">Full-page captures, kept only while you need them.</p>
       </div>
     </header>
 
     <div id="warning" class="warning" hidden></div>
+
+    <section class="viewport" aria-labelledby="viewport-label">
+      <div class="viewport-top">
+        <label id="viewport-label" for="device">Viewport</label>
+        <select id="device">
+          <option value="desktop">Desktop (current window)</option>
+          <option value="iphone">iPhone · 390 × 844</option>
+          <option value="pixel">Pixel · 412 × 915</option>
+          <option value="ipad">iPad · 768 × 1024</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div id="dimensions" class="dimensions" hidden>
+        <label>Width <input id="viewport-width" type="number" min="200" max="2000" value="390" inputmode="numeric" /> px</label>
+        <label>Height <input id="viewport-height" type="number" min="200" max="3000" value="844" inputmode="numeric" /> px</label>
+      </div>
+    </section>
 
     <div class="actions">
       <button id="full" class="btn primary" type="button">

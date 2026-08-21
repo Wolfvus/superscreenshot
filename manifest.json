@@ -25,7 +25,7 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "scripting", "contextMenus", "unlimitedStorage"],
+  "permissions": ["activeTab", "scripting", "contextMenus", "unlimitedStorage", "debugger"],
   "host_permissions": ["<all_urls>"],
   "commands": {
     "capture-full": {

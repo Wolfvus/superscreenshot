@@ -10,6 +10,16 @@ const progressCount = document.getElementById("progress-count");
 const barFill = document.getElementById("bar-fill");
 const cancelBtn = document.getElementById("cancel");
 const shortcuts = document.getElementById("shortcuts");
+const device = document.getElementById("device");
+const dimensions = document.getElementById("dimensions");
+const viewportWidth = document.getElementById("viewport-width");
+const viewportHeight = document.getElementById("viewport-height");
+
+const DEVICE_VIEWPORTS = {
+  iphone: { width: 390, height: 844, dpr: 3 },
+  pixel: { width: 412, height: 915, dpr: 2.625 },
+  ipad: { width: 768, height: 1024, dpr: 2 },
+};
 
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 shortcuts.textContent = isMac
@@ -79,18 +89,40 @@ function onMessage(msg) {
   }
 }
 
+function selectedViewport() {
+  if (device.value === "desktop") return null;
+  if (DEVICE_VIEWPORTS[device.value]) return DEVICE_VIEWPORTS[device.value];
+  const width = Number(viewportWidth.value);
+  const height = Number(viewportHeight.value);
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 200 || width > 2000 || height < 200 || height > 3000) {
+    setWarning("Custom viewport must be 200–2000 px wide and 200–3000 px tall.");
+    return undefined;
+  }
+  return { width, height, dpr: 2 };
+}
+
 function capture(mode) {
   if (busy || tabId == null) return;
+  const viewport = selectedViewport();
+  if (viewport === undefined) return;
   setWarning("");
   setBusy(true);
   progressLabel.textContent = "Starting…";
   progressCount.textContent = "";
   barFill.style.width = "8%";
-  connect().postMessage({ type: "CAPTURE", mode, tabId });
+  connect().postMessage({ type: "CAPTURE", mode, tabId, viewport });
 }
 
 fullBtn.addEventListener("click", () => capture("full"));
 visibleBtn.addEventListener("click", () => capture("visible"));
+device.addEventListener("change", () => {
+  const preset = DEVICE_VIEWPORTS[device.value];
+  dimensions.hidden = device.value !== "custom";
+  if (preset) {
+    viewportWidth.value = preset.width;
+    viewportHeight.value = preset.height;
+  }
+});
 cancelBtn.addEventListener("click", () => {
   connect().postMessage({ type: "CANCEL" });
   chrome.runtime.sendMessage({ type: "CANCEL" });

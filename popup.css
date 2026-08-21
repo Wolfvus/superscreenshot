@@ -5,8 +5,8 @@
   --line: #2a3140;
   --text: #f3f5f8;
   --muted: #8b93a7;
-  --accent: #6d5cff;
-  --accent-2: #8b7dff;
+  --accent: #0577b9;
+  --accent-2: #13b9df;
   --danger: #ff6b81;
   --ok: #4ade9b;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
@@ -59,6 +59,47 @@ h1 {
   gap: 8px;
 }
 
+.viewport {
+  margin: 0 0 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #141b26;
+}
+
+.viewport-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+select,
+input {
+  border: 1px solid #364255;
+  border-radius: 7px;
+  background: #0e141e;
+  color: var(--text);
+  font: inherit;
+}
+
+select { padding: 5px 7px; }
+
+.dimensions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.dimensions label { display: grid; gap: 3px; }
+
+.dimensions input { width: 100%; padding: 5px 7px; }
+
 .btn {
   appearance: none;
   width: 100%;
@@ -90,7 +131,7 @@ h1 {
 
 .btn.primary:hover:not(:disabled) {
   filter: brightness(1.06);
-  background: linear-gradient(180deg, #9a8dff, var(--accent));
+  background: linear-gradient(180deg, #25c9e8, var(--accent));
 }
 
 .btn:disabled {
@@ -147,7 +188,7 @@ h1 {
 #bar-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--accent), #9b8cff);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
   transition: width 180ms ease;
 }
 

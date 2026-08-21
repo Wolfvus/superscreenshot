@@ -1,7 +1,8 @@
-import { saveCapture } from "./store.js";
+import { deleteCapture, saveCapture } from "./store.js";
 
 const MAX_CAPTURES = 80;
 const CAPTURE_GAP_MS = 550;
+const PREVIEW_TAB_KEY_PREFIX = "preview-tab:";
 const RESTRICTED = /^(chrome|chrome-extension|edge|about|devtools|view-source|brave|opera):/i;
 const STORE_HOSTS = /^(https:\/\/chrome\.google\.com\/webstore|https:\/\/chromewebstore\.google\.com)/i;
 
@@ -41,6 +42,7 @@ chrome.runtime.onConnect.addListener((port) => {
         mode: msg.mode === "visible" ? "visible" : "full",
         tabId: msg.tabId,
         port,
+        viewport: msg.viewport || null,
       });
     } else if (msg?.type === "CANCEL") {
       if (session) session.aborted = true;
@@ -63,7 +65,44 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "CANCEL") {
     if (session) session.aborted = true;
     sendResponse({ ok: true });
+    return;
   }
+  if (msg?.type === "DISCARD_CAPTURE") {
+    void discardCapture(msg.id, _sender.tab?.id).then(
+      () => sendResponse({ ok: true }),
+      (err) => sendResponse({ ok: false, error: err?.message || "Could not discard screenshot." })
+    );
+    return true;
+  }
+});
+
+function previewTabKey(tabId) {
+  return `${PREVIEW_TAB_KEY_PREFIX}${tabId}`;
+}
+
+async function discardCapture(id, tabId) {
+  if (!id) return;
+  await deleteCapture(id);
+  if (tabId != null) await chrome.storage.session.remove(previewTabKey(tabId));
+}
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  void chrome.storage.session.get(previewTabKey(tabId)).then(async (values) => {
+    const id = values[previewTabKey(tabId)];
+    await chrome.storage.session.remove(previewTabKey(tabId));
+    if (!id) return;
+    await deleteCapture(id);
+  });
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status !== "loading" || !tab.url) return;
+  const previewUrl = new URL(chrome.runtime.getURL("preview.html"));
+  const url = new URL(tab.url);
+  if (url.origin !== previewUrl.origin || url.pathname !== previewUrl.pathname) return;
+  const id = url.searchParams.get("id");
+  if (!id) return;
+  void chrome.storage.session.set({ [previewTabKey(tabId)]: id });
 });
 
 function delay(ms) {
@@ -131,7 +170,7 @@ function post(port, payload) {
 
 async function setBadge(text) {
   try {
-    await chrome.action.setBadgeBackgroundColor({ color: "#6d5cff" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#0577b9" });
     if (chrome.action.setBadgeTextColor) {
       await chrome.action.setBadgeTextColor({ color: "#ffffff" });
     }
@@ -163,10 +202,13 @@ async function inject(tabId) {
   });
 }
 
-async function captureWindow(windowId, lastAt) {
+async function captureWindow(windowId, lastAt, debuggee = null) {
   const wait = CAPTURE_GAP_MS - (Date.now() - lastAt);
   if (wait > 0) await delay(wait);
   try {
+    if (debuggee) {
+      return { dataUrl: await captureViewport(debuggee), at: Date.now() };
+    }
     const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "png" });
     return { dataUrl, at: Date.now() };
   } catch (err) {
@@ -174,6 +216,52 @@ async function captureWindow(windowId, lastAt) {
     if (/file/i.test(message)) throw new Error(restrictedMessage("file://"));
     throw new Error("Couldn't photograph the tab. Keep this window in front until capture finishes.");
   }
+}
+
+async function applyViewport(tabId, viewport) {
+  if (!viewport) return null;
+  const debuggee = { tabId };
+  try {
+    await chrome.debugger.attach(debuggee, "1.3");
+    await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride", {
+      width: viewport.width,
+      height: viewport.height,
+      deviceScaleFactor: viewport.dpr,
+      mobile: true,
+      screenWidth: viewport.width,
+      screenHeight: viewport.height,
+    });
+    await delay(250);
+    return debuggee;
+  } catch (err) {
+    try {
+      await chrome.debugger.detach(debuggee);
+    } catch {
+      /* debugger was not attached */
+    }
+    throw new Error(`Couldn't set the mobile viewport. ${err?.message || "Close DevTools and try again."}`);
+  }
+}
+
+async function clearViewport(debuggee) {
+  if (!debuggee) return;
+  try {
+    await chrome.debugger.sendCommand(debuggee, "Emulation.clearDeviceMetricsOverride");
+  } catch {
+    /* tab may have closed */
+  }
+  try {
+    await chrome.debugger.detach(debuggee);
+  } catch {
+    /* debugger may already be detached */
+  }
+}
+
+async function captureViewport(debuggee) {
+  if (!debuggee) return null;
+  const result = await chrome.debugger.sendCommand(debuggee, "Page.captureScreenshot", { format: "png" });
+  if (!result?.data) throw new Error("Couldn't photograph the emulated viewport.");
+  return `data:image/png;base64,${result.data}`;
 }
 
 function assertNotAborted() {
@@ -184,7 +272,7 @@ function assertNotAborted() {
   }
 }
 
-async function startCapture({ mode, tabId, port }) {
+async function startCapture({ mode, tabId, port, viewport = null }) {
   if (session) {
     post(port || session.port, {
       type: "error",
@@ -202,7 +290,7 @@ async function startCapture({ mode, tabId, port }) {
 
   await withKeepAlive(async () => {
     try {
-      await runCapture(mode, tabId);
+      await runCapture(mode, tabId, viewport);
     } catch (err) {
       await restoreQuiet(tabId);
       await setBadge("");
@@ -229,7 +317,7 @@ async function restoreQuiet(tabId) {
   }
 }
 
-async function runCapture(mode, tabId) {
+async function runCapture(mode, tabId, viewport) {
   const tab = await chrome.tabs.get(tabId);
   if (isRestricted(tab.url || "")) {
     throw new Error(restrictedMessage(tab.url));
@@ -241,32 +329,37 @@ async function runCapture(mode, tabId) {
   post(session.port, { type: "progress", phase: "preparing", current: 0, total: 1 });
   await setBadge("…");
 
-  if (mode === "visible") {
-    await captureVisible(tab);
-    return;
-  }
+  const debuggee = await applyViewport(tabId, viewport);
+  try {
+    if (mode === "visible") {
+      await captureVisible(tab, viewport, debuggee);
+      return;
+    }
 
-  await captureFull(tab);
+    await captureFull(tab, debuggee);
+  } finally {
+    await clearViewport(debuggee);
+  }
 }
 
-async function captureVisible(tab) {
+async function captureVisible(tab, viewport, debuggee) {
   assertNotAborted();
-  const shot = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+  const shot = (await captureViewport(debuggee)) || (await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }));
   const blob = dataUrlToBlob(shot);
   await persistAndOpen({
     mode: "visible",
     tab,
     tiles: [{ blob, scrollY: 0 }],
     meta: {
-      windowWidth: tab.width || 0,
-      windowHeight: tab.height || 0,
-      documentHeight: tab.height || 0,
-      dpr: 1,
+      windowWidth: viewport?.width || tab.width || 0,
+      windowHeight: viewport?.height || tab.height || 0,
+      documentHeight: viewport?.height || tab.height || 0,
+      dpr: viewport?.dpr || 1,
     },
   });
 }
 
-async function captureFull(tab) {
+async function captureFull(tab, debuggee) {
   try {
     await inject(tab.id);
   } catch {
@@ -308,7 +401,7 @@ async function captureFull(tab) {
         await sendToTab(tab.id, { op: "wait" });
       }
 
-      const shot = await captureWindow(tab.windowId, lastCaptureAt);
+      const shot = await captureWindow(tab.windowId, lastCaptureAt, debuggee);
       lastCaptureAt = shot.at;
       const actual = await sendToTab(tab.id, { op: "metrics" });
       tiles.push({
@@ -379,9 +472,12 @@ async function persistAndOpen({ mode, tab, tiles, meta }) {
     dpr: meta.dpr,
     tiles,
   });
-  await chrome.tabs.create({
+  const previewTab = await chrome.tabs.create({
     url: chrome.runtime.getURL(`preview.html?id=${encodeURIComponent(id)}`),
     active: true,
   });
+  if (previewTab.id != null) {
+    await chrome.storage.session.set({ [previewTabKey(previewTab.id)]: id });
+  }
   post(session.port, { type: "done", id });
 }

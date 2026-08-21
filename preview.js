@@ -10,6 +10,7 @@ const stageEl = document.getElementById("stage");
 const imageEl = document.getElementById("image");
 const copyBtn = document.getElementById("copy");
 const downloadBtn = document.getElementById("download");
+const discardBtn = document.getElementById("discard");
 
 const id = new URLSearchParams(location.search).get("id");
 let objectUrl = "";
@@ -120,6 +121,18 @@ downloadBtn.addEventListener("click", () => {
   a.href = objectUrl;
   a.download = filename;
   a.click();
+});
+
+discardBtn.addEventListener("click", async () => {
+  if (!id || !confirm("Move this screenshot to trash? It will be deleted immediately.")) return;
+  discardBtn.disabled = true;
+  const response = await chrome.runtime.sendMessage({ type: "DISCARD_CAPTURE", id });
+  if (!response?.ok) {
+    discardBtn.disabled = false;
+    fail(response?.error || "Could not discard screenshot.");
+    return;
+  }
+  window.close();
 });
 
 async function main() {
