@@ -54,6 +54,7 @@ Mobile emulation is temporary. Chrome may show a debugging banner while it is ac
 | `scripting` | Coordinate scrolling, page measurements, and fixed-element handling |
 | `contextMenus` | Add screenshot actions to Chrome's context menu |
 | `unlimitedStorage` | Hold large screenshot tiles locally while the preview is open |
+| `storage` | Track open preview tabs so temporary captures are deleted when they close |
 | `debugger` | Temporarily emulate mobile viewport dimensions and capture that rendered viewport |
 | `<all_urls>` | Allow capture on regular websites the user chooses |
 
@@ -137,6 +138,7 @@ La emulación móvil es temporal. Chrome puede mostrar una barra de depuración 
 | `scripting` | Coordinar desplazamiento, medidas y elementos fijos |
 | `contextMenus` | Agregar acciones al menú contextual de Chrome |
 | `unlimitedStorage` | Mantener temporalmente capturas grandes mientras la vista previa está abierta |
+| `storage` | Registrar las vistas previas abiertas para eliminar sus capturas al cerrarlas |
 | `debugger` | Emular temporalmente dimensiones móviles y capturar el resultado |
 | `<all_urls>` | Permitir capturas en los sitios normales que el usuario seleccione |
 

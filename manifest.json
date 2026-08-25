@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "SuperScreenshot",
   "short_name": "SuperShot",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Capture full-page screenshots of any tab. Scrolls, stitches, and saves locally — nothing is uploaded.",
   "minimum_chrome_version": "114",
   "icons": {
@@ -25,7 +25,7 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "scripting", "contextMenus", "unlimitedStorage", "debugger"],
+  "permissions": ["activeTab", "scripting", "contextMenus", "unlimitedStorage", "storage", "debugger"],
   "host_permissions": ["<all_urls>"],
   "commands": {
     "capture-full": {
