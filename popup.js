@@ -35,6 +35,7 @@ function setBusy(next) {
   busy = next;
   fullBtn.disabled = next || fullBtn.dataset.blocked === "1";
   visibleBtn.disabled = next || fullBtn.dataset.blocked === "1";
+  device.disabled = next || fullBtn.dataset.blocked === "1";
   progress.hidden = !next;
 }
 
@@ -109,6 +110,7 @@ if (tabId == null || RESTRICTED.test(url) || STORE_HOSTS.test(url)) {
   fullBtn.dataset.blocked = "1";
   fullBtn.disabled = true;
   visibleBtn.disabled = true;
+  device.disabled = true;
   setWarning("This tab can’t be captured. Open a regular webpage and try again.");
 } else if (url.startsWith("file:")) {
   setWarning("For local files, enable “Allow access to file URLs” on chrome://extensions.");

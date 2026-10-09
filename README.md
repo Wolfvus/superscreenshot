@@ -21,7 +21,7 @@ No screenshot is uploaded to a server. Captures exist temporarily in the extensi
 - Full-page scrolling capture with automatic image stitching
 - Visible-area capture
 - Fixed responsive viewport presets for iPad and iPhone 15 Pro
-- Local preview with **Copy**, **Download PNG**, and **Trash** actions
+- Local preview with **Copy**, **Save PNG**, **Delete**, and zoom controls
 - Immediate automatic cleanup when the preview tab closes
 - Toolbar, keyboard shortcut, and context-menu capture options
 - Local-only processing with no analytics or screenshot uploads
@@ -38,7 +38,8 @@ Pin SuperScreenshot from Chrome's extensions menu for quick access. To capture `
 
 ### Usage
 
-- Open the toolbar popup and choose **Capture full page** or **Visible area**.
+- Open the toolbar popup and choose **Full page** or **Visible area**.
+- Use **Screen size** to choose the current window, iPad, or iPhone layout.
 - Select **Current window** to use the current browser viewport.
 - Select iPad or iPhone 15 Pro to capture that responsive/mobile layout.
 - Use **Alt+Shift+S** for full-page capture or **Alt+Shift+V** for visible-area capture. On macOS, the shortcuts are **⌥⇧S** and **⌥⇧V**.
@@ -92,6 +93,8 @@ The extension uses plain HTML, CSS, and JavaScript with no build step. After cha
 
 ---
 
+The compact popup keeps the two capture actions up front. The preview toolbar keeps copy, save, delete, and zoom available even in narrow windows. Device selection is locked while capturing to avoid changing the active capture.
+
 ## Español
 
 ### Descripción
@@ -105,7 +108,7 @@ Ninguna captura se envía a un servidor. Las imágenes existen temporalmente en 
 - Captura de página completa con desplazamiento y unión automática
 - Captura del área visible
 - Tamaños adaptables fijos para iPad y iPhone 15 Pro
-- Vista previa local con **Copy**, **Download PNG** y **Trash**
+- Vista previa local con **Copy**, **Save PNG**, **Delete** y controles de zoom
 - Eliminación automática inmediata al cerrar la vista previa
 - Captura desde la barra, atajos de teclado y menú contextual
 - Procesamiento completamente local, sin analítica ni cargas de imágenes
@@ -122,7 +125,7 @@ Fija SuperScreenshot desde el menú de extensiones de Chrome para tener acceso r
 
 ### Uso
 
-- Abre la extensión y selecciona **Capture full page** o **Visible area**.
+- Abre la extensión y selecciona **Full page** o **Visible area**.
 - Selecciona **Current window** para usar el tamaño actual de la ventana.
 - Selecciona iPad o iPhone 15 Pro para capturar ese diseño adaptable/móvil.
 - Usa **Alt+Shift+S** para una página completa o **Alt+Shift+V** para el área visible. En macOS, usa **⌥⇧S** y **⌥⇧V**.
