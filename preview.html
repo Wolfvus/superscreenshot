@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Screenshot preview</title>
+    <title data-i18n="previewTitle">Screenshot preview</title>
     <link rel="stylesheet" href="preview.css" />
   </head>
   <body>
@@ -11,26 +11,25 @@
       <div class="brand">
         <img src="icons/icon32.png" alt="" width="22" height="22" />
         <div>
-          <div id="title" class="title">Screenshot</div>
+          <div id="title" class="title" data-i18n="screenshot">Screenshot</div>
           <div id="meta" class="meta"></div>
         </div>
       </div>
       <div class="tools">
-        <div class="zoom-tools" aria-label="Preview zoom">
-          <button id="zoom-out" class="icon-btn" type="button" title="Zoom out" disabled aria-label="Zoom out">−</button>
-          <button id="zoom-fit" class="zoom-label" type="button" title="Fit screenshot to window" disabled>Fit</button>
-          <button id="zoom-in" class="icon-btn" type="button" title="Zoom in" disabled aria-label="Zoom in">+</button>
+        <div class="zoom-tools" aria-label="Preview zoom" data-i18n-aria-label="previewZoom">
+          <button id="zoom-out" class="icon-btn" type="button" title="Zoom out" data-i18n-title="zoomOut" disabled aria-label="Zoom out" data-i18n-aria-label="zoomOut">−</button>
+          <button id="zoom-fit" class="zoom-label" type="button" title="Fit screenshot to window" data-i18n-title="fitTitle" disabled data-i18n="fit">Fit</button>
+          <button id="zoom-in" class="icon-btn" type="button" title="Zoom in" data-i18n-title="zoomIn" disabled aria-label="Zoom in" data-i18n-aria-label="zoomIn">+</button>
         </div>
-        <span class="tool-divider" aria-hidden="true"></span>
-        <button id="copy" class="btn" type="button" disabled><span aria-hidden="true">▣</span> Copy</button>
-        <button id="download" class="btn primary" type="button" disabled><span aria-hidden="true">↓</span> Download PNG</button>
-        <button id="discard" class="btn danger icon-only" type="button" title="Delete screenshot" aria-label="Delete screenshot">×</button>
+        <button id="copy" class="btn" type="button" disabled data-i18n="copy">Copy</button>
+        <button id="download" class="btn primary" type="button" disabled data-i18n="save">Save PNG</button>
+        <button id="discard" class="btn danger" type="button" title="Delete screenshot" data-i18n-title="deleteTitle" data-i18n="delete">Delete</button>
       </div>
     </header>
     <main>
-      <div id="status" class="status" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><span id="status-text">Stitching screenshot…</span></div>
+      <div id="status" class="status" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><span id="status-text" data-i18n="stitching">Stitching screenshot…</span></div>
       <div id="stage" class="stage" hidden>
-        <div class="image-shell"><img id="image" alt="Captured page" /></div>
+        <div class="image-shell"><img id="image" alt="Captured page" data-i18n-alt="imageAlt" /></div>
       </div>
     </main>
     <script src="preview.js" type="module"></script>

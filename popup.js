@@ -1,3 +1,5 @@
+import { t, localize } from "./i18n.js";
+localize();
 const RESTRICTED = /^(chrome|chrome-extension|edge|about|devtools|view-source|brave|opera):/i;
 const STORE_HOSTS = /^(https:\/\/chrome\.google\.com\/webstore|https:\/\/chromewebstore\.google\.com)/i;
 
@@ -13,9 +15,7 @@ const shortcuts = document.getElementById("shortcuts");
 const device = document.getElementById("device");
 
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-shortcuts.textContent = isMac
-  ? "Shortcuts: ⌥⇧S full page · ⌥⇧V visible area"
-  : "Shortcuts: Alt+Shift+S full page · Alt+Shift+V visible area";
+shortcuts.textContent = t("shortcuts", isMac ? ["⌥⇧S", "⌥⇧V"] : ["Alt+Shift+S", "Alt+Shift+V"]);
 
 let port = null;
 let tabId = null;
@@ -35,6 +35,7 @@ function setBusy(next) {
   busy = next;
   fullBtn.disabled = next || fullBtn.dataset.blocked === "1";
   visibleBtn.disabled = next || fullBtn.dataset.blocked === "1";
+  device.disabled = next || fullBtn.dataset.blocked === "1";
   progress.hidden = !next;
 }
 
@@ -58,10 +59,10 @@ function onMessage(msg) {
     progressCount.textContent = msg.phase === "capturing" ? `${current}/${total}` : "";
     progressLabel.textContent =
       msg.phase === "preparing"
-        ? "Preparing page…"
+        ? t("preparing")
         : msg.phase === "saving"
-          ? "Opening preview…"
-          : "Scrolling and capturing…";
+          ? t("opening")
+          : t("scrolling");
     return;
   }
   if (msg.type === "done") {
@@ -71,12 +72,12 @@ function onMessage(msg) {
   }
   if (msg.type === "cancelled") {
     setBusy(false);
-    progressLabel.textContent = "Cancelled";
+    progressLabel.textContent = t("cancelled");
     return;
   }
   if (msg.type === "error") {
     setBusy(false);
-    setWarning(msg.error || "Capture failed.");
+    setWarning(msg.error || t("failed"));
   }
 }
 
@@ -84,7 +85,7 @@ function capture(mode) {
   if (busy || tabId == null) return;
   setWarning("");
   setBusy(true);
-  progressLabel.textContent = "Starting…";
+  progressLabel.textContent = t("starting");
   progressCount.textContent = "";
   barFill.style.width = "8%";
   connect().postMessage({
@@ -109,9 +110,10 @@ if (tabId == null || RESTRICTED.test(url) || STORE_HOSTS.test(url)) {
   fullBtn.dataset.blocked = "1";
   fullBtn.disabled = true;
   visibleBtn.disabled = true;
-  setWarning("This tab can’t be captured. Open a regular webpage and try again.");
+  device.disabled = true;
+  setWarning(t("restricted"));
 } else if (url.startsWith("file:")) {
-  setWarning("For local files, enable “Allow access to file URLs” on chrome://extensions.");
+  setWarning(t("fileAccess"));
 }
 
 const status = await chrome.runtime.sendMessage({ type: "STATUS" }).catch(() => null);

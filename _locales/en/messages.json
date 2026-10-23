@@ -1,0 +1,191 @@
+{
+  "fullPage": {
+    "message": "Full page"
+  },
+  "visibleArea": {
+    "message": "Visible area"
+  },
+  "screenSize": {
+    "message": "Screen size"
+  },
+  "currentWindow": {
+    "message": "Current window"
+  },
+  "capturing": {
+    "message": "Capturing…"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "privacy": {
+    "message": "Local PNG. No uploads."
+  },
+  "captureHint": {
+    "message": "Capture this tab. Save what matters."
+  },
+  "language": {
+    "message": "Language"
+  },
+  "preparing": {
+    "message": "Preparing page…"
+  },
+  "opening": {
+    "message": "Opening preview…"
+  },
+  "scrolling": {
+    "message": "Scrolling and capturing…"
+  },
+  "cancelled": {
+    "message": "Cancelled"
+  },
+  "failed": {
+    "message": "Capture failed."
+  },
+  "starting": {
+    "message": "Starting…"
+  },
+  "restricted": {
+    "message": "This tab can’t be captured. Open a regular webpage and try again."
+  },
+  "fileAccess": {
+    "message": "For local files, enable “Allow access to file URLs” on chrome://extensions."
+  },
+  "previewTitle": {
+    "message": "Screenshot preview"
+  },
+  "screenshot": {
+    "message": "Screenshot"
+  },
+  "previewZoom": {
+    "message": "Preview zoom"
+  },
+  "zoomOut": {
+    "message": "Zoom out"
+  },
+  "zoomIn": {
+    "message": "Zoom in"
+  },
+  "fitTitle": {
+    "message": "Fit screenshot to window"
+  },
+  "fit": {
+    "message": "Fit"
+  },
+  "copy": {
+    "message": "Copy"
+  },
+  "save": {
+    "message": "Save PNG"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "deleteTitle": {
+    "message": "Delete screenshot"
+  },
+  "stitching": {
+    "message": "Stitching screenshot…"
+  },
+  "imageAlt": {
+    "message": "Captured page"
+  },
+  "noTiles": {
+    "message": "No screenshot tiles were saved."
+  },
+  "tooLarge": {
+    "message": "The page was too large to encode as a PNG. Try capturing the visible area."
+  },
+  "copied": {
+    "message": "Copied"
+  },
+  "copyFailed": {
+    "message": "Copy failed"
+  },
+  "confirmDelete": {
+    "message": "Delete this screenshot permanently?"
+  },
+  "discardFailed": {
+    "message": "Could not discard screenshot."
+  },
+  "missingId": {
+    "message": "Missing screenshot id. Capture a page from the toolbar icon."
+  },
+  "unavailable": {
+    "message": "This screenshot is no longer available. Capture the page again from the toolbar."
+  },
+  "loading": {
+    "message": "Loading screenshot…"
+  },
+  "stitchFull": {
+    "message": "Stitching full-page screenshot…"
+  },
+  "openFailed": {
+    "message": "Could not open this screenshot."
+  },
+  "captureFull": {
+    "message": "Capture full page"
+  },
+  "captureVisible": {
+    "message": "Capture visible area"
+  },
+  "cannotCapture": {
+    "message": "This tab can't be captured."
+  },
+  "unexpected": {
+    "message": "Unexpected screenshot data."
+  },
+  "reload": {
+    "message": "Could not talk to the page. Reload it and try again."
+  },
+  "noResponse": {
+    "message": "The page did not respond."
+  },
+  "closeDevtools": {
+    "message": "Close Chrome DevTools on this tab and try again."
+  },
+  "emulateFailed": {
+    "message": "Couldn't emulate this device. Reload the page and try again."
+  },
+  "frameFailed": {
+    "message": "Couldn't photograph the emulated viewport."
+  },
+  "keepFocused": {
+    "message": "Couldn't photograph the tab. Keep this window in front until capture finishes."
+  },
+  "captureCancelled": {
+    "message": "Capture cancelled."
+  },
+  "cancelling": {
+    "message": "Cancel is still finishing."
+  },
+  "alreadyRunning": {
+    "message": "A capture is already running."
+  },
+  "unsupportedDevice": {
+    "message": "Unsupported device preset."
+  },
+  "scriptsBlocked": {
+    "message": "This page doesn't allow capture scripts. Try a normal webpage."
+  },
+  "noPreview": {
+    "message": "Chrome did not create the preview tab."
+  },
+  "previewClosed": {
+    "message": "The preview tab was closed before the screenshot opened."
+  },
+  "extensionDescription": {
+    "message": "Capture full-page, visible-area, and mobile screenshots. Save locally. Nothing is uploaded."
+  },
+  "viewportFailed": {
+    "message": "Could not set the $1 viewport. $2"
+  },
+  "tryAgain": {
+    "message": "Try again."
+  },
+  "widthFailed": {
+    "message": "The page did not switch to the $1px device viewport."
+  },
+  "shortcuts": {
+    "message": "Shortcuts: $1 full page · $2 visible area"
+  }
+}

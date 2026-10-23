@@ -1,3 +1,5 @@
+import { t, localize } from "./i18n.js";
+localize();
 import { getCapture, saveCapture } from "./store.js";
 
 const MAX_AREA = 16384 * 16384;
@@ -43,7 +45,7 @@ zoomFitBtn.addEventListener("click", () => {
   zoom = 0;
   imageShell.style.width = "min(1100px, 100%)";
   imageShell.style.maxWidth = "1100px";
-  zoomFitBtn.textContent = "Fit";
+  zoomFitBtn.textContent = t("fit");
 });
 
 function formatBytes(n) {
@@ -54,20 +56,17 @@ function formatBytes(n) {
 
 async function stitch(capture) {
   const tiles = capture.tiles || [];
-  if (!tiles.length) throw new Error("No screenshot tiles were saved.");
+  if (!tiles.length) throw new Error(t("noTiles"));
 
   if (capture.mode === "visible" || tiles.length === 1) {
     return tiles[0].blob;
   }
 
-  const bitmaps = [];
-  for (const tile of tiles) {
-    bitmaps.push(await createImageBitmap(tile.blob));
-  }
+  const first = await createImageBitmap(tiles[0].blob);
 
-  const windowWidth = capture.windowWidth || bitmaps[0].width;
-  const windowHeight = capture.windowHeight || bitmaps[0].height;
-  const scale = bitmaps[0].width / Math.max(1, windowWidth);
+  const windowWidth = capture.windowWidth || first.width;
+  const windowHeight = capture.windowHeight || first.height;
+  const scale = first.width / Math.max(1, windowWidth);
   const documentHeight = Math.max(
     capture.documentHeight || 0,
     tiles[tiles.length - 1].scrollY + windowHeight
@@ -90,29 +89,32 @@ async function stitch(capture) {
   ctx.fillRect(0, 0, outW, outH);
 
   let destY = 0;
-  for (let i = 0; i < bitmaps.length; i++) {
-    const bitmap = bitmaps[i];
-    const tileCssH = bitmap.height / scale;
-    const scrollY = tiles[i].scrollY || 0;
-    const remaining = documentHeight - destY;
-    if (remaining <= 0.5) break;
-    let sourceCssY = Math.max(0, destY - scrollY);
-    if (sourceCssY >= tileCssH - 0.5) sourceCssY = 0;
-    const sliceCssH = Math.min(tileCssH - sourceCssY, remaining);
-    if (sliceCssH <= 0.5) continue;
-    const sy = sourceCssY * scale;
-    const sh = Math.min(bitmap.height - sy, sliceCssH * scale);
-    const dy = destY * scale * fit;
-    const dh = sliceCssH * scale * fit;
-    ctx.drawImage(bitmap, 0, sy, bitmap.width, sh, 0, dy, outW, dh);
-    destY += sliceCssH;
-    bitmap.close();
+  for (let i = 0; i < tiles.length; i++) {
+    const bitmap = i === 0 ? first : await createImageBitmap(tiles[i].blob);
+    try {
+      const tileCssH = bitmap.height / scale;
+      const scrollY = tiles[i].scrollY || 0;
+      const remaining = documentHeight - destY;
+      if (remaining <= 0.5) break;
+      let sourceCssY = Math.max(0, destY - scrollY);
+      if (sourceCssY >= tileCssH - 0.5) sourceCssY = 0;
+      const sliceCssH = Math.min(tileCssH - sourceCssY, remaining);
+      if (sliceCssH <= 0.5) continue;
+      const sy = sourceCssY * scale;
+      const sh = Math.min(bitmap.height - sy, sliceCssH * scale);
+      const dy = destY * scale * fit;
+      const dh = sliceCssH * scale * fit;
+      ctx.drawImage(bitmap, 0, sy, bitmap.width, sh, 0, dy, outW, dh);
+      destY += sliceCssH;
+    } finally {
+      bitmap.close();
+    }
   }
 
   const blob = await new Promise((resolve, reject) => {
     canvas.toBlob((result) => {
       if (result) resolve(result);
-      else reject(new Error("The page was too large to encode as a PNG. Try capturing the visible area."));
+      else reject(new Error(t("tooLarge")));
     }, "image/png");
   });
   return blob;
@@ -130,14 +132,14 @@ copyBtn.addEventListener("click", async () => {
   if (!pngBlob) return;
   try {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })]);
-    copyBtn.textContent = "Copied";
+    copyBtn.textContent = t("copied");
     setTimeout(() => {
-      copyBtn.textContent = "Copy";
+      copyBtn.textContent = t("copy");
     }, 1200);
   } catch {
-    copyBtn.textContent = "Copy failed";
+    copyBtn.textContent = t("copyFailed");
     setTimeout(() => {
-      copyBtn.textContent = "Copy";
+      copyBtn.textContent = t("copy");
     }, 1400);
   }
 });
@@ -151,12 +153,12 @@ downloadBtn.addEventListener("click", () => {
 });
 
 discardBtn.addEventListener("click", async () => {
-  if (!id || !confirm("Move this screenshot to trash? It will be deleted immediately.")) return;
+  if (!id || !confirm(t("confirmDelete"))) return;
   discardBtn.disabled = true;
   const response = await chrome.runtime.sendMessage({ type: "DISCARD_CAPTURE", id });
   if (!response?.ok) {
     discardBtn.disabled = false;
-    fail(response?.error || "Could not discard screenshot.");
+    fail(response?.error || t("discardFailed"));
     return;
   }
   window.close();
@@ -164,20 +166,20 @@ discardBtn.addEventListener("click", async () => {
 
 async function main() {
   if (!id) {
-    fail("Missing screenshot id. Capture a page from the toolbar icon.");
+    fail(t("missingId"));
     return;
   }
 
   const capture = await getCapture(id);
   if (!capture) {
-    fail("This screenshot is no longer available. Capture the page again from the toolbar.");
+    fail(t("unavailable"));
     return;
   }
 
-  document.title = capture.title ? `${capture.title} · screenshot` : "Screenshot preview";
-  titleEl.textContent = capture.title || "Screenshot";
+  document.title = capture.title ? `${capture.title} · ${t("screenshot")}` : t("previewTitle");
+  titleEl.textContent = capture.title || t("screenshot");
   filename = capture.filename || filename;
-  statusTextEl.textContent = capture.mode === "visible" ? "Loading screenshot…" : "Stitching full-page screenshot…";
+  statusTextEl.textContent = capture.mode === "visible" ? t("loading") : t("stitchFull");
 
   pngBlob = capture.image || (await stitch(capture));
   if (!capture.image) {
@@ -201,9 +203,9 @@ async function main() {
     }
     imageEl.onload = () => resolve({ w: imageEl.naturalWidth, h: imageEl.naturalHeight });
   });
-  const kind = capture.mode === "visible" ? "visible area" : "full page";
+  const kind = capture.mode === "visible" ? t("visibleArea") : t("fullPage");
   const device = capture.deviceLabel ? ` · ${capture.deviceLabel}` : "";
   metaEl.textContent = `${dims.w} × ${dims.h} · ${formatBytes(pngBlob.size)} · ${kind}${device}`;
 }
 
-main().catch((err) => fail(err?.message || "Could not open this screenshot."));
+main().catch((err) => fail(err?.message || t("openFailed")));

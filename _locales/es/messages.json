@@ -1,0 +1,191 @@
+{
+  "fullPage": {
+    "message": "Página completa"
+  },
+  "visibleArea": {
+    "message": "Área visible"
+  },
+  "screenSize": {
+    "message": "Tamaño de pantalla"
+  },
+  "currentWindow": {
+    "message": "Ventana actual"
+  },
+  "capturing": {
+    "message": "Capturando…"
+  },
+  "cancel": {
+    "message": "Cancelar"
+  },
+  "privacy": {
+    "message": "PNG local. Sin subir archivos."
+  },
+  "captureHint": {
+    "message": "Captura esta pestaña. Guarda lo importante."
+  },
+  "language": {
+    "message": "Idioma"
+  },
+  "preparing": {
+    "message": "Preparando la página…"
+  },
+  "opening": {
+    "message": "Abriendo vista previa…"
+  },
+  "scrolling": {
+    "message": "Desplazando y capturando…"
+  },
+  "cancelled": {
+    "message": "Cancelado"
+  },
+  "failed": {
+    "message": "No se pudo capturar."
+  },
+  "starting": {
+    "message": "Iniciando…"
+  },
+  "restricted": {
+    "message": "No se puede capturar esta pestaña. Abre una página web normal e inténtalo de nuevo."
+  },
+  "fileAccess": {
+    "message": "Para archivos locales, activa «Permitir acceso a URLs de archivos» en chrome://extensions."
+  },
+  "previewTitle": {
+    "message": "Vista previa de captura"
+  },
+  "screenshot": {
+    "message": "Captura"
+  },
+  "previewZoom": {
+    "message": "Zoom de vista previa"
+  },
+  "zoomOut": {
+    "message": "Alejar"
+  },
+  "zoomIn": {
+    "message": "Acercar"
+  },
+  "fitTitle": {
+    "message": "Ajustar captura a la ventana"
+  },
+  "fit": {
+    "message": "Ajustar"
+  },
+  "copy": {
+    "message": "Copiar"
+  },
+  "save": {
+    "message": "Guardar PNG"
+  },
+  "delete": {
+    "message": "Eliminar"
+  },
+  "deleteTitle": {
+    "message": "Eliminar captura"
+  },
+  "stitching": {
+    "message": "Uniendo la captura…"
+  },
+  "imageAlt": {
+    "message": "Página capturada"
+  },
+  "noTiles": {
+    "message": "No se guardaron imágenes de la captura."
+  },
+  "tooLarge": {
+    "message": "La página es demasiado grande para guardarla como PNG. Prueba con el área visible."
+  },
+  "copied": {
+    "message": "Copiado"
+  },
+  "copyFailed": {
+    "message": "Error al copiar"
+  },
+  "confirmDelete": {
+    "message": "¿Eliminar esta captura permanentemente?"
+  },
+  "discardFailed": {
+    "message": "No se pudo eliminar la captura."
+  },
+  "missingId": {
+    "message": "Falta el identificador de captura. Captura una página desde el icono de la extensión."
+  },
+  "unavailable": {
+    "message": "Esta captura ya no está disponible. Captura la página de nuevo desde la extensión."
+  },
+  "loading": {
+    "message": "Cargando captura…"
+  },
+  "stitchFull": {
+    "message": "Uniendo la captura de página completa…"
+  },
+  "openFailed": {
+    "message": "No se pudo abrir esta captura."
+  },
+  "captureFull": {
+    "message": "Capturar página completa"
+  },
+  "captureVisible": {
+    "message": "Capturar área visible"
+  },
+  "cannotCapture": {
+    "message": "No se puede capturar esta pestaña."
+  },
+  "unexpected": {
+    "message": "Datos de captura inesperados."
+  },
+  "reload": {
+    "message": "No se pudo comunicar con la página. Recárgala e inténtalo de nuevo."
+  },
+  "noResponse": {
+    "message": "La página no respondió."
+  },
+  "closeDevtools": {
+    "message": "Cierra las herramientas de desarrollo de Chrome en esta pestaña e inténtalo de nuevo."
+  },
+  "emulateFailed": {
+    "message": "No se pudo emular este dispositivo. Recarga la página e inténtalo de nuevo."
+  },
+  "frameFailed": {
+    "message": "No se pudo capturar la pantalla emulada."
+  },
+  "keepFocused": {
+    "message": "No se pudo capturar la pestaña. Mantén esta ventana al frente hasta terminar."
+  },
+  "captureCancelled": {
+    "message": "Captura cancelada."
+  },
+  "cancelling": {
+    "message": "La cancelación aún está en curso."
+  },
+  "alreadyRunning": {
+    "message": "Ya hay una captura en curso."
+  },
+  "unsupportedDevice": {
+    "message": "Dispositivo no compatible."
+  },
+  "scriptsBlocked": {
+    "message": "Esta página no permite ejecutar la captura. Prueba con una página web normal."
+  },
+  "noPreview": {
+    "message": "Chrome no creó la pestaña de vista previa."
+  },
+  "previewClosed": {
+    "message": "La pestaña de vista previa se cerró antes de abrir la captura."
+  },
+  "extensionDescription": {
+    "message": "Captura páginas completas, áreas visibles y pantallas móviles. Guarda localmente. No se sube nada."
+  },
+  "viewportFailed": {
+    "message": "No se pudo configurar la pantalla de $1. $2"
+  },
+  "tryAgain": {
+    "message": "Inténtalo de nuevo."
+  },
+  "widthFailed": {
+    "message": "La página no cambió al tamaño de pantalla de $1 px."
+  },
+  "shortcuts": {
+    "message": "Atajos: $1 página completa · $2 área visible"
+  }
+}

@@ -210,7 +210,8 @@
       });
       el.style.setProperty("visibility", "hidden", "important");
     }
-    state.hidden = next;
+    // Preserve earlier tiles’ entries so every hidden element is restored.
+    state.hidden.push(...next);
     return { hidden: next.length };
   }
 
