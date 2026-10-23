@@ -1,181 +1,92 @@
 # SuperScreenshot
 
-> A privacy-first Chrome extension for full-page, visible-area, and responsive viewport screenshots.
+A local-first Chrome extension for full-page, visible-area and responsive screenshots.
 
 [English](#english) · [Español](#español)
 
-This repository is a fork of [soymangomez/superscreenshot](https://github.com/soymangomez/superscreenshot). It keeps the original local-first capture approach and adds responsive viewport emulation, automatic screenshot cleanup, and a refreshed ocean-blue interface.
-
----
+![SuperScreenshot popup in English](docs/popup-en.png)
+![SuperScreenshot en español](docs/popup-es.png)
 
 ## English
 
-### Overview
+**Choose a screen size. Capture. Copy or save a PNG.** No account, uploads or analytics.
 
-SuperScreenshot captures an entire web page or only the visible viewport and produces a local PNG preview. Full-page captures are assembled from viewport images while the extension scrolls the page and suppresses repeating fixed elements. Device captures emulate screen metrics, pixel ratio, touch input, and a mobile user agent, then verify the PNG dimensions before saving.
+This maintained fork builds on [soymangomez/superscreenshot](https://github.com/soymangomez/superscreenshot). Wolfvus's additions include verified iPad/iPhone viewport emulation, temporary capture cleanup, a simpler interface, English/Spanish localization and capture regression checks.
 
-No screenshot is uploaded to a server. Captures exist temporarily in the extension's IndexedDB storage and are deleted as soon as their preview tab is closed or when **Trash** is selected.
-
-### Features
-
-- Full-page scrolling capture with automatic image stitching
-- Visible-area capture
-- Fixed responsive viewport presets for iPad and iPhone 15 Pro
-- Local preview with **Copy**, **Download PNG**, and **Trash** actions
-- Immediate automatic cleanup when the preview tab closes
-- Toolbar, keyboard shortcut, and context-menu capture options
-- Local-only processing with no analytics or screenshot uploads
-
-### Install locally
+### Install and capture
 
 1. Clone or download this repository.
-2. Open `chrome://extensions` in Chrome.
-3. Enable **Developer mode**.
-4. Select **Load unpacked**.
-5. Choose the repository directory.
+2. Open `chrome://extensions` and enable **Developer mode**.
+3. Select **Load unpacked**, choose the repository folder and pin the extension.
+4. Open a webpage. Choose **Current window**, **iPad** or **iPhone 15 Pro**, then **Full page** or **Visible area**.
+5. In the preview, **Copy**, **Save PNG**, zoom or **Delete** the capture.
 
-Pin SuperScreenshot from Chrome's extensions menu for quick access. To capture `file://` pages, enable **Allow access to file URLs** in the extension details.
+The interface follows Chrome's language: Spanish for Spanish-language Chrome, English otherwise. Reload the extension after changing Chrome's language. The preview, context menus, shortcuts and error messages are localized; website content and native browser errors keep their own language.
 
-### Usage
+Shortcuts: **Alt+Shift+S** (full page), **Alt+Shift+V** (visible area). On macOS: **⌥⇧S** / **⌥⇧V**. You can also right-click a page to capture it.
 
-- Open the toolbar popup and choose **Capture full page** or **Visible area**.
-- Select **Current window** to use the current browser viewport.
-- Select iPad or iPhone 15 Pro to capture that responsive/mobile layout.
-- Use **Alt+Shift+S** for full-page capture or **Alt+Shift+V** for visible-area capture. On macOS, the shortcuts are **⌥⇧S** and **⌥⇧V**.
-- Use the page context menu for a full-page capture.
+### Privacy and permissions
 
-Mobile emulation is temporary. Chrome may show a debugging banner while it is active. The extension restores the page's normal viewport and detaches the debugger immediately after capture completes or is cancelled.
+Captures stay in this extension's local IndexedDB while the preview is open. Closing the preview or selecting **Delete** removes the temporary image; files you explicitly download remain on disk. Save images you want to keep before closing their previews.
 
-### Permissions
-
-| Permission | Purpose |
+| Permission | Reason |
 | --- | --- |
-| `activeTab` | Access the tab explicitly selected for capture |
-| `scripting` | Coordinate scrolling, page measurements, and fixed-element handling |
-| `contextMenus` | Add screenshot actions to Chrome's context menu |
-| `unlimitedStorage` | Hold large screenshot tiles locally while the preview is open |
-| `storage` | Track open preview tabs so temporary captures are deleted when they close |
-| `debugger` | Temporarily emulate mobile viewport dimensions and capture that rendered viewport |
-| `<all_urls>` | Allow capture on regular websites the user chooses |
+| `activeTab`, `<all_urls>` | Capture websites you select |
+| `scripting` | Scroll, measure and temporarily hide repeating fixed elements |
+| `debugger` | Emulate a mobile viewport and verify its capture dimensions |
+| `contextMenus` | Add right-click capture actions |
+| `storage`, `unlimitedStorage` | Track previews and hold large captures locally |
 
-### Project structure
+Mobile emulation may show Chrome's debugging banner. The extension restores the viewport and detaches on completion or cancellation. For local HTML files, enable **Allow access to file URLs** in the extension's settings.
 
-```text
-superscreenshot/
-├── manifest.json          Chrome Manifest V3 configuration and permissions
-├── background.js          Capture orchestration, viewport emulation, and cleanup
-├── content.js             Page metrics, scrolling, and fixed-element handling
-├── devices.js             Verified iPad and iPhone 15 Pro emulation profiles
-├── popup.html             Toolbar popup markup
-├── popup.css              Toolbar popup styling and ocean-blue theme
-├── popup.js               Popup state, viewport selection, and capture controls
-├── preview.html           Screenshot preview markup
-├── preview.css            Preview interface styling
-├── preview.js             Image stitching, copy, download, and trash actions
-├── store.js               Temporary IndexedDB capture storage
-├── icons/                 Extension icons at Chrome's required sizes
-├── examples/              Long-page manual capture fixture
-└── scripts/               Development utilities such as icon generation
+### Limitations
+
+- Chrome pages, the Chrome Web Store, DevTools and other protected tabs cannot be captured.
+- Full-page capture stops at 80 tiles. Large images are scaled to browser canvas limits.
+- Keep the target window focused during desktop capture. Close DevTools before mobile emulation.
+- Dynamic layouts, infinite scrolling and unusual nested scrollers may need a visible-area capture.
+
+### Development and checks
+
+Plain HTML, CSS and JavaScript; no build step and no runtime dependencies. Reload the unpacked extension after editing.
+
+- `popup.*`: capture controls; `preview.*`: stitching, zoom and export.
+- `background.js`: capture lifecycle, emulation and cleanup; `content.js`: page measurements and restoration.
+- `_locales/en` and `_locales/es`: Chrome message catalogs; `i18n.js`: shared UI localization.
+- [Long-page fixture](examples/long-page.html): 2700px page with a fixed header for capture checks.
+
+Run dependency-free catalog and stitching checks with `node --test tests/unit.mjs`. The actual-extension browser test uses Playwright Chromium in a fresh disposable profile:
+
+```sh
+npm install --no-save --package-lock=false playwright@1.62.1
+npx playwright install chromium
+node tests/extension.mjs
 ```
 
-### Technical notes and limitations
-
-- Protected browser pages such as `chrome://`, the Chrome Web Store, DevTools, and most extension pages cannot be captured.
-- Full-page capture is capped at 80 viewport images.
-- Oversized results are scaled down to stay within browser canvas limits.
-- Chrome may prevent mobile emulation while DevTools is attached to the same tab.
-- Keep the target Chrome window focused while a standard desktop capture is running.
-
-### Development
-
-The extension uses plain HTML, CSS, and JavaScript with no build step. After changing source files, reload it from `chrome://extensions`. Use `examples/long-page.html` for a manual full-page capture check.
-
----
+The test checks desktop and mobile dimensions, stitched pixels, page restoration, cancellation, preview deletion and localized UI. If Playwright is already installed elsewhere, set `PLAYWRIGHT_PATH` to its `index.mjs`; no project install is needed. `ARTIFACT_DIR=/tmp/superscreenshot-check` saves UI screenshots. See [measured performance](docs/performance.md) for the fixture and comparison limits.
 
 ## Español
 
-### Descripción
+**Elige el tamaño de pantalla. Captura. Copia o guarda un PNG.** Sin cuentas, subidas ni analítica.
 
-SuperScreenshot captura una página web completa o solamente el área visible y genera una vista previa PNG local. Para capturar una página completa, la extensión desplaza el contenido, toma imágenes del viewport y evita que los elementos fijos se repitan en el resultado final. Las capturas de dispositivos emulan las métricas de pantalla, la densidad de píxeles, la entrada táctil y un agente de usuario móvil, y verifican las dimensiones del PNG antes de guardarlo.
+Esta versión mantenida parte de [soymangomez/superscreenshot](https://github.com/soymangomez/superscreenshot). Las mejoras de Wolfvus incluyen emulación verificada de iPad/iPhone, limpieza de capturas temporales, una interfaz más simple, traducción al español y pruebas de captura.
 
-Ninguna captura se envía a un servidor. Las imágenes existen temporalmente en el almacenamiento IndexedDB de la extensión y se eliminan en cuanto se cierra la pestaña de vista previa o al seleccionar **Trash**.
-
-### Funciones
-
-- Captura de página completa con desplazamiento y unión automática
-- Captura del área visible
-- Tamaños adaptables fijos para iPad y iPhone 15 Pro
-- Vista previa local con **Copy**, **Download PNG** y **Trash**
-- Eliminación automática inmediata al cerrar la vista previa
-- Captura desde la barra, atajos de teclado y menú contextual
-- Procesamiento completamente local, sin analítica ni cargas de imágenes
-
-### Instalación local
+### Instalación y uso
 
 1. Clona o descarga este repositorio.
-2. Abre `chrome://extensions` en Chrome.
-3. Activa **Developer mode**.
-4. Selecciona **Load unpacked**.
-5. Elige la carpeta del repositorio.
+2. Abre `chrome://extensions` y activa **Modo de desarrollador**.
+3. Selecciona **Cargar descomprimida**, elige la carpeta del repositorio y fija la extensión.
+4. Abre una página. Elige **Ventana actual**, **iPad** o **iPhone 15 Pro**, y después **Página completa** o **Área visible**.
+5. En la vista previa, usa **Copiar**, **Guardar PNG**, los controles de zoom o **Eliminar**.
 
-Fija SuperScreenshot desde el menú de extensiones de Chrome para tener acceso rápido. Para capturar páginas `file://`, activa **Allow access to file URLs** en los detalles de la extensión.
+La interfaz sigue el idioma de Chrome: español si Chrome está en español; inglés en los demás casos. Recarga la extensión tras cambiar el idioma de Chrome. El contenido de los sitios y los errores del navegador conservan su propio idioma.
 
-### Uso
+Atajos: **Alt+Shift+S** para página completa y **Alt+Shift+V** para área visible. En macOS: **⌥⇧S** / **⌥⇧V**. También puedes capturar desde el menú del botón derecho.
 
-- Abre la extensión y selecciona **Capture full page** o **Visible area**.
-- Selecciona **Current window** para usar el tamaño actual de la ventana.
-- Selecciona iPad o iPhone 15 Pro para capturar ese diseño adaptable/móvil.
-- Usa **Alt+Shift+S** para una página completa o **Alt+Shift+V** para el área visible. En macOS, usa **⌥⇧S** y **⌥⇧V**.
-- También puedes iniciar una captura completa desde el menú contextual de la página.
+### Privacidad y límites
 
-La emulación móvil es temporal. Chrome puede mostrar una barra de depuración mientras está activa. La extensión restaura el tamaño normal de la página y desconecta el depurador inmediatamente después de terminar o cancelar la captura.
+Las capturas se guardan temporalmente en el dispositivo y se eliminan al cerrar su vista previa o pulsar **Eliminar**. Los PNG que descargues permanecen en disco. Guarda lo que quieras conservar antes de cerrar la vista previa.
 
-### Permisos
+La emulación móvil restaura la pantalla y desconecta el depurador al terminar o cancelar. Chrome puede mostrar una barra de depuración. Las páginas protegidas no se pueden capturar; el límite es de 80 imágenes y los resultados muy grandes se reducen. Mantén la ventana enfocada durante una captura de escritorio y cierra las herramientas de desarrollo para emular dispositivos.
 
-| Permiso | Motivo |
-| --- | --- |
-| `activeTab` | Acceder a la pestaña que el usuario eligió capturar |
-| `scripting` | Coordinar desplazamiento, medidas y elementos fijos |
-| `contextMenus` | Agregar acciones al menú contextual de Chrome |
-| `unlimitedStorage` | Mantener temporalmente capturas grandes mientras la vista previa está abierta |
-| `storage` | Registrar las vistas previas abiertas para eliminar sus capturas al cerrarlas |
-| `debugger` | Emular temporalmente dimensiones móviles y capturar el resultado |
-| `<all_urls>` | Permitir capturas en los sitios normales que el usuario seleccione |
-
-### Estructura del proyecto
-
-```text
-superscreenshot/
-├── manifest.json          Configuración y permisos de Chrome Manifest V3
-├── background.js          Captura, emulación de viewport y eliminación
-├── content.js             Medición, desplazamiento y elementos fijos
-├── devices.js             Perfiles verificados de emulación para iPad y iPhone 15 Pro
-├── popup.html             Estructura de la ventana de la extensión
-├── popup.css              Estilos y tema azul océano
-├── popup.js               Estado, selección del viewport y controles
-├── preview.html           Estructura de la vista previa
-├── preview.css            Estilos de la vista previa
-├── preview.js             Unión, copia, descarga y eliminación de imágenes
-├── store.js               Almacenamiento temporal mediante IndexedDB
-├── icons/                 Iconos requeridos por Chrome
-├── examples/              Página larga para pruebas manuales
-└── scripts/               Utilidades de desarrollo y generación de iconos
-```
-
-### Notas técnicas y limitaciones
-
-- Chrome no permite capturar páginas protegidas como `chrome://`, Chrome Web Store, DevTools y la mayoría de páginas de extensiones.
-- Las capturas completas tienen un límite de 80 imágenes de viewport.
-- Los resultados demasiado grandes se reducen para respetar los límites del canvas del navegador.
-- Chrome puede impedir la emulación móvil si DevTools está conectado a la misma pestaña.
-- Mantén enfocada la ventana de Chrome durante una captura normal de escritorio.
-
-### Desarrollo
-
-La extensión utiliza HTML, CSS y JavaScript sin proceso de compilación. Después de modificar los archivos, recarga la extensión desde `chrome://extensions`. Usa `examples/long-page.html` para comprobar manualmente las capturas de página completa.
-
----
-
-Original project: [soymangomez/superscreenshot](https://github.com/soymangomez/superscreenshot)
-
-Maintained fork: [Wolfvus/superscreenshot](https://github.com/Wolfvus/superscreenshot)
+Para probar cambios, recarga la extensión y abre la [página de prueba](examples/long-page.html). Activa **Permitir acceso a URLs de archivos** si la abres como archivo local. Las instrucciones de pruebas automáticas y los permisos están en la sección en inglés.

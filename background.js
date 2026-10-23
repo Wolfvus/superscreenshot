@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import { DEVICES } from "./devices.js";
 import { deleteCapture, listCaptureIds, saveCapture } from "./store.js";
 
@@ -13,12 +14,12 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll().then(() => {
     chrome.contextMenus.create({
       id: "capture-full",
-      title: "Capture full page",
+      title: t("captureFull"),
       contexts: ["page", "frame", "action"],
     });
     chrome.contextMenus.create({
       id: "capture-visible",
-      title: "Capture visible area",
+      title: t("captureVisible"),
       contexts: ["page", "frame", "action"],
     });
   });
@@ -71,7 +72,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "DISCARD_CAPTURE") {
     void discardCapture(msg.id, _sender.tab?.id).then(
       () => sendResponse({ ok: true }),
-      (err) => sendResponse({ ok: false, error: err?.message || "Could not discard screenshot." })
+      (err) => sendResponse({ ok: false, error: err?.message || t("discardFailed") })
     );
     return true;
   }
@@ -155,11 +156,11 @@ function isRestricted(url) {
 }
 
 function restrictedMessage(url) {
-  if (!url) return "This tab can't be captured.";
+  if (!url) return t("cannotCapture");
   if (url.startsWith("file:")) {
-    return "Local files need extra permission. Open chrome://extensions, find SuperScreenshot, and enable “Allow access to file URLs”.";
+    return t("fileAccess");
   }
-  return "Chrome pages, the Web Store, and other protected tabs can't be captured. Open a regular website and try again.";
+  return t("restricted");
 }
 
 function slug(value) {
@@ -181,7 +182,7 @@ function timestamp() {
 
 function dataUrlToBlob(dataUrl) {
   const match = /^data:([^;]+);base64,(.+)$/.exec(dataUrl);
-  if (!match) throw new Error("Unexpected screenshot data.");
+  if (!match) throw new Error(t("unexpected"));
   const binary = atob(match[2]);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -227,11 +228,11 @@ async function sendToTab(tabId, payload) {
   } catch (err) {
     const message = String(err?.message || err);
     if (/Receiving end does not exist/i.test(message)) {
-      throw new Error("Could not talk to the page. Reload it and try again.");
+      throw new Error(t("reload"));
     }
     throw err;
   }
-  if (!response?.ok) throw new Error(response?.error || "The page did not respond.");
+  if (!response?.ok) throw new Error(response?.error || t("noResponse"));
   return response.result;
 }
 
@@ -269,9 +270,9 @@ async function attachDevice(tabId, device) {
   } catch (err) {
     const message = String(err?.message || err);
     if (/Another debugger|already attached|DevTools/i.test(message)) {
-      throw new Error("Close Chrome DevTools on this tab and try again.");
+      throw new Error(t("closeDevtools"));
     }
-    throw new Error("Couldn't emulate this device. Reload the page and try again.");
+    throw new Error(t("emulateFailed"));
   }
 
   try {
@@ -297,7 +298,7 @@ async function attachDevice(tabId, device) {
     return debuggee;
   } catch (err) {
     await detachDevice(debuggee);
-    throw new Error(`Couldn't set the ${device.label} viewport. ${err?.message || "Try again."}`);
+    throw new Error(t("viewportFailed", [device.label, err?.message || t("tryAgain")]));
   }
 }
 
@@ -328,7 +329,7 @@ async function captureEmulated(debuggee, { beyond = false, clip = null, fromSurf
   };
   if (clip) params.clip = clip;
   const result = await sendDebugger(debuggee, "Page.captureScreenshot", params);
-  if (!result?.data) throw new Error("Couldn't photograph the emulated viewport.");
+  if (!result?.data) throw new Error(t("frameFailed"));
   return `data:image/png;base64,${result.data}`;
 }
 
@@ -362,7 +363,7 @@ async function captureDeviceFrame(debuggee, device, { scrollY = 0 } = {}) {
     }
   }
   if (best) return best;
-  throw lastError || new Error("Couldn't photograph the emulated viewport.");
+  throw lastError || new Error(t("frameFailed"));
 }
 
 async function scrollPage(tabId, y, debuggee) {
@@ -408,11 +409,12 @@ async function waitForDeviceWidth(tabId, width, timeout = 2500) {
     await delay(50);
   }
   if (metrics && Math.abs(Math.round(metrics.windowWidth) - width) <= 1) return metrics;
-  throw new Error(`The page did not switch to the ${width}px device viewport.`);
+  throw new Error(t("widthFailed", String(width)));
 }
 
 async function captureWindow(windowId, lastAt, debuggee = null, device = null, scrollY = 0) {
-  const wait = CAPTURE_GAP_MS - (Date.now() - lastAt);
+  // Only captureVisibleTab has Chrome’s two-calls-per-second quota.
+  const wait = debuggee && device ? 0 : CAPTURE_GAP_MS - (Date.now() - lastAt);
   if (wait > 0) await delay(wait);
   try {
     if (debuggee && device) {
@@ -426,13 +428,13 @@ async function captureWindow(windowId, lastAt, debuggee = null, device = null, s
   } catch (err) {
     const message = String(err?.message || err);
     if (/file/i.test(message)) throw new Error(restrictedMessage("file://"));
-    throw new Error("Couldn't photograph the tab. Keep this window in front until capture finishes.");
+    throw new Error(t("keepFocused"));
   }
 }
 
 function assertNotAborted() {
   if (session?.aborted) {
-    const err = new Error("Capture cancelled.");
+    const err = new Error(t("captureCancelled"));
     err.cancelled = true;
     throw err;
   }
@@ -442,7 +444,7 @@ async function startCapture({ mode, tabId, port, deviceId = null }) {
   if (session) {
     post(port || session.port, {
       type: "error",
-      error: session.aborted ? "Cancel is still finishing." : "A capture is already running.",
+      error: session.aborted ? t("cancelling") : t("alreadyRunning"),
     });
     return;
   }
@@ -463,7 +465,7 @@ async function startCapture({ mode, tabId, port, deviceId = null }) {
       if (!err?.cancelled) {
         post(session?.port, {
           type: "error",
-          error: err?.message || "Capture failed.",
+          error: err?.message || t("failed"),
         });
       } else {
         post(session?.port, { type: "cancelled" });
@@ -496,7 +498,7 @@ async function runCapture(mode, tabId, deviceId, fromPopup) {
   await setBadge("…");
 
   const device = resolveDevice(deviceId);
-  if (deviceId && !device) throw new Error("Unsupported device preset.");
+  if (deviceId && !device) throw new Error(t("unsupportedDevice"));
   const debuggee = device ? await attachDevice(tabId, device) : null;
   try {
     if (mode === "visible") {
@@ -557,7 +559,7 @@ async function captureFull(tab, debuggee, device) {
   try {
     await inject(tab.id);
   } catch {
-    throw new Error("This page doesn't allow capture scripts. Try a normal webpage.");
+    throw new Error(t("scriptsBlocked"));
   }
   if (device) {
     await waitForDeviceWidth(tab.id, device.width);
@@ -675,7 +677,7 @@ async function persistAndOpen({ mode, tab, tiles, meta, device = null }) {
       url: chrome.runtime.getURL(`preview.html?id=${encodeURIComponent(id)}`),
       active: true,
     });
-    if (previewTab.id == null) throw new Error("Chrome did not create the preview tab.");
+    if (previewTab.id == null) throw new Error(t("noPreview"));
     const key = previewTabKey(previewTab.id);
     await chrome.storage.session.set({ [key]: id });
     try {
@@ -683,7 +685,7 @@ async function persistAndOpen({ mode, tab, tiles, meta, device = null }) {
     } catch {
       await chrome.storage.session.remove(key);
       await deleteCapture(id);
-      throw new Error("The preview tab was closed before the screenshot opened.");
+      throw new Error(t("previewClosed"));
     }
   } catch (err) {
     await deleteCapture(id);
