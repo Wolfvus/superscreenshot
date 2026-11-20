@@ -4,7 +4,7 @@
 
 [English](#english) · [Español](#español)
 
-This repository is a fork of [soymangomez/superscreenshot](https://github.com/soymangomez/superscreenshot). It keeps the original local-first capture approach and adds responsive viewport emulation, automatic screenshot cleanup, and a refreshed ocean-blue interface.
+This repository is a fork of [mangurk/superscreenshot](https://github.com/mangurk/superscreenshot). It keeps the original local-first capture approach and adds responsive viewport emulation, automatic screenshot cleanup, and a refreshed ocean-blue interface.
 
 ---
 
@@ -176,6 +176,6 @@ La extensión utiliza HTML, CSS y JavaScript sin proceso de compilación. Despu�
 
 ---
 
-Original project: [soymangomez/superscreenshot](https://github.com/soymangomez/superscreenshot)
+Original project: [mangurk/superscreenshot](https://github.com/mangurk/superscreenshot)
 
 Maintained fork: [Wolfvus/superscreenshot](https://github.com/Wolfvus/superscreenshot)
